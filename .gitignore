@@ -1,0 +1,117 @@
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# Next.js
+/.next/
+/out/
+/build
+
+# Misc
+.DS_Store
+*.pem
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local env files
+.env*.local
+.env
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# SWC binaries
+**/next-swc*
+
+# Test ve derleme çıktıları
+/frontend/.next
+/frontend/out
+
+# Ortam değişkenleri
+/frontend/.env*.local
+
+# Geliştirme ve üretim logları
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+
+# IDE ve editörler
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Diğer
+.DS_Store
+*.pem
+
+# Yerel geliştirme ortamı
+/frontend/.vercel
+/frontend/.env
+
+# spring boot
+/backend/target
+/backend/bin/
+/backend/build/
+/backend/out/
+
+# IDE özel dosyaları
+/backend/.idea/
+/backend/*.iml
+/backend/*.ipr
+/backend/*.iws
+/backend/.vscode/
+/backend/.classpath
+/backend/.project
+/backend/.settings/
+/backend/*.swp
+/backend/*.swo
+
+# Log dosyaları
+/backend/*.log
+/backend/logs/
+
+# Dependency yönetimi
+/backend/.mvn/
+/backend/mvnw
+/backend/mvnw.cmd
+/backend/.gradle/
+/backend/gradle/
+/backend/gradlew
+/backend/gradlew.bat
+
+# Yerel geliştirme ortamı
+/backend/.env
+/backend/.springboot
+/backend/.DS_Store
+
+# Test raporları ve verileri
+/backend/test-output/
+/backend/test-results/
+
+# Spring Boot özel dosyalar
+/backend/application.properties
+/backend/application-*.properties
+/backend/application.yml
+/backend/application-*.yml
+
+# Diğer
+/backend/*.class
+/backend/*.jar
+/backend/*.war
+/backend/*.ear
+/backend/*.zip
+/backend/*.tar.gz
+/backend/*.bak
