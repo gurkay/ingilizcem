@@ -1,0 +1,53 @@
+# Set port for the app to run on
+server:
+  port: 8080
+
+    
+debug: true
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  application:
+    name: backend
+  datasource:
+    url: jdbc:mysql://mysql:3306/wordmasterdb?allowPublicKeyRetrieval=true&useSSL=false&useUnicode=true&characterEncoding=UTF-8
+    username: wordmaster
+    password: wordmaster123
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+        connection:
+          characterEncoding: utf8
+          CharSet: utf8
+          useUnicode: true
+    show-sql: true
+  mvc:
+    pathmatch:
+      matching-strategy: ant-path-matcher
+
+app:
+  cors:
+    allowed-origins: https://ingilizcem.net, http://localhost:3000
+    allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+    allowed-headers: Authorization,Content-Type
+    exposed-headers: Authorization
+    allow-credentials: true
+    max-age: 3600
+    
+saas:
+  app:
+    jwtSecret: 904asd8f90a8sdf089asdf09809d8f09df8090asd8f90as8df90as8df90
+    jwtExpirationMs: 86400000
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    com.template.backend: DEBUG
+    # org.hibernate.SQL: DEBUG
