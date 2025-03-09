@@ -1,9 +1,9 @@
 package com.template.backend.security;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -14,22 +14,38 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class CorsConfig {
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource(@Value("${app.cors.allowed-origins}") List<String> allowedOrigins) {
-        // Immutable listeyi değiştirilebilir bir listeye çevir
-        List<String> updatedAllowedOrigins = new ArrayList<>(allowedOrigins);
-        updatedAllowedOrigins.add("http://localhost:3000");
-        updatedAllowedOrigins.add("http://localhost:8080");
-        updatedAllowedOrigins.add("http://127.0.0.1:8080");
-        updatedAllowedOrigins.add("http://localhost:3306");
-
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
+        
+        // Allowed origins
+        List<String> allowedOrigins = new ArrayList<>();
+        allowedOrigins.add("http://ingilizcem.net");
+        allowedOrigins.add("https://ingilizcem.net");
+        allowedOrigins.add("http://www.ingilizcem.net");
+        allowedOrigins.add("https://www.ingilizcem.net");
+        allowedOrigins.add("http://localhost:3000");
+        configuration.setAllowedOrigins(allowedOrigins);
+        
+        // Allowed methods
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        
+        // Allowed headers
+        configuration.setAllowedHeaders(Arrays.asList(
+            "Authorization", 
+            "Content-Type", 
+            "X-Requested-With",
+            "Accept"
+        ));
+        
+        // Allow credentials
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(updatedAllowedOrigins);
-        configuration.addAllowedMethod("*");
-        configuration.addAllowedHeader("*");
-
+        
+        // Max age
+        configuration.setMaxAge(3600L);
+        
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
+        
         return source;
     }
 }

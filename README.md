@@ -10,6 +10,9 @@ openssl rand -base64 32
 # backend/target/backend-0.0.1-SNAPSHOT.jar
 cd backend && mvn clean package && cd ..
 ```
+docker system prune -a // tüm container'ları kaldır
+docker system prune -f // tüm image'ları kaldır
+docker system prune -v // tüm volume'ları kaldır
 docker-compose build --no-cache
 docker-compose down -v
 docker-compose up --build -d
@@ -24,7 +27,7 @@ INSERT INTO roles(name) VALUES('ROLE_ADMIN');
 ```
 # yontem 1
 # Mevcut commit'i geri al
-git reset HEAD~1
+git reset --soft HEAD~1
 
 # node_modules klasörünü Git'ten kaldır
 git rm -r --cached node_modules
@@ -36,39 +39,125 @@ git commit -m "Initial commit without node_modules"
 # GitHub'a push et
 git push -u origin main
 
-# yontem 2
-# 1. Git geçmişinden node_modules klasörünü sil
-git filter-branch --force --index-filter \
-  "git rm -rf --cached --ignore-unmatch frontend/node_modules" \
-  --prune-empty --tag-name-filter cat -- --all
 
-# 2. Git geçmişini temizle
-git gc --prune=now
+```
+## Run docker build and push to docker hub
+# Projenin backend dizininde
+# Create a new builder instance
+docker buildx create --use
+cd backend && docker buildx build --platform linux/amd64 -t gurkay/backend-image:latest --push . && cd ..
 
-# 3. Mevcut değişiklikleri geri al
-git reset --hard
+# Projenin frontend dizininde
+cd frontend && docker buildx build --platform linux/amd64 -t gurkay/frontend-image:latest --push . && cd ..
 
-# 4. node_modules klasörünü .gitignore'a ekle (zaten ekli)
+# Projenin root dizininde
+docker images
 
-# 5. Zorla push et
-git push origin main --force
+# Kullanıcı adı ve şifrenizi girin
+docker login
+```
+```
+## container işlemleri
+# container listesi
+docker ps -a
 
-# yontem 3
-# 1. Yeni bir branch oluştur
-git checkout --orphan latest_branch
+# container logları
+docker logs -f <container-id>
 
-# 2. Tüm dosyaları ekle
-git add -A
+# container'ı kapat
+docker stop <container-id>
 
-# 3. Değişiklikleri commit et
-git commit -m "Fresh start without node_modules"
+# container'ı başlat
+docker start <container-id>
 
-# 4. main branch'i sil
-git branch -D main
+# container'ı kaldır
+docker rm <container-id>
 
-# 5. Current branch'i main olarak yeniden adlandır
-git branch -m main
+# container'ı yeniden başlat
+docker restart <container-id>
 
-# 6. Zorla push et
-git push -f origin main
+# container'ın içine gir
+docker exec -it <container-id> bash
+
+# container'ın dışına çık
+exit
+
+# container'ın loglarını görüntüle
+docker logs -f <container-id>
+
+```
+```
+## linux sunucuda swap oluşturma
+# login to server
+ssh root@143.110.232.75
+
+# copy files
+scp -r /Users/gurkay/Documents/myCodes/cursorAI/ingilizcem-ai root@143.110.232.75:/root/
+
+# run docker compose
+cd /root/proje
+docker-compose up --build -d
+
+# delete file in server
+rm -rf /root/proje
+
+# swap dosyasını oluştur
+sudo fallocate -l 2G /swapfile
+
+# dosyayı sadece root erişebilir yap
+sudo chmod 600 /swapfile
+
+# swap dosyasını swap alanına dönüştür
+sudo mkswap /swapfile
+
+# swap alanını etkinleştir
+sudo swapon /swapfile
+
+# swap'in durumunu kontrol et
+sudo swapon --show
+
+# swap'in boyutunu kontrol et
+sudo swapon --summary
+
+# swap'i devre dışı bırak
+sudo swapoff /swapfile
+
+```
+## curl commands
+```
+curl -X POST http://localhost:8080/api/auth/signin -H "Content-Type: application/json" -d '{"email":"user@gmail.com","password":"123456"}'
+
+curl -X POST http://localhost:8080/api/auth/signup -H "Content-Type: application/json" -d '{"email":"user@gmail.com","password":"123456"}'
+
+curl -X POST http://localhost:8080/api/auth/signin -H "Content-Type: application/json" -d '{"email":"user@gmail.com","password":"123456"}'
+
+curl -X POST http://localhost:8080/api/auth/_log -H "Content-Type: application/json" -d '{"email":"user@gmail.com","password":"123456"}'
+
+curl -X GET http://localhost:8080/api/auth/error -H "Content-Type: application/json"
+
+```
+## mysql connection in container
+```
+# login to server
+ssh root@<droplet-ip-adresi>
+
+# connect to mysql
+docker exec -it <container-id> mysql -u root -p wordmasterdb
+
+# show databases
+show databases; 
+
+# show tables
+show tables;
+
+# show users
+show users;
+
+# show current database
+select database();
+
+# show current user
+select user();
+
+
 ```

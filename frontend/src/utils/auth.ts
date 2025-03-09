@@ -1,7 +1,29 @@
-import { NextAuthOptions, getServerSession } from "next-auth";
+import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import apiAuthSignIn from "./api";
+import { DefaultSession } from "next-auth";
+import { getServerSession } from "next-auth";
 
+declare module "next-auth" {
+  interface User {
+    id?: string;
+    accessToken?: string;
+    roles?: string[];
+  }
+  
+  interface Session {
+    user: {
+      id?: string;
+      accessToken?: string;
+      roles?: string[];
+    } & DefaultSession["user"]
+  }
+
+  interface JWT {
+    id?: string;
+    accessToken?: string;
+    roles?: string[];
+  }
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -9,59 +31,67 @@ export const authOptions: NextAuthOptions = {
       name: "Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
+        password: { label: "Password", type: "password" }
       },
-      async authorize(
-        credentials: Record<"email" |  "password", string> | undefined
-      ) {
-        if (!credentials) {
-          throw new Error("Invalid credentials");
-        }
-
+      async authorize(credentials) {
         try {
-          console.log("authorize:::credentials: ", credentials);
-          const user = await apiAuthSignIn(credentials);
-          console.log("authorize:::user: ", user);
-          if (!user) {
-            throw new Error("Invalid username or password");
+          const res = await fetch(`${process.env.BACKEND_API_URL}/api/auth/signin`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: credentials?.email,
+              password: credentials?.password,
+            }),
+          });
+
+          const data = await res.json();
+
+          if (res.ok && data.accessToken) {
+            return {
+              id: data.id.toString(),
+              email: data.email,
+              name: data.username,
+              accessToken: data.accessToken,
+              roles: data.roles,
+            };
           }
-          return user;
+
+          return null;
         } catch (error) {
-          throw new Error((error as Error)?.message || "Login failed");
+          console.error('Auth error:', error);
+          return null;
         }
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, account, user }) {
-      if (account && user) {
-        token.accessToken = (user as any)?.accessToken;
-        token.user = user;
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.accessToken = user.accessToken;
+        token.roles = user.roles;
       }
       return token;
     },
     async session({ session, token }) {
-      session.user = token.user as any;
-      session.accessToken = token.accessToken as string;
+      if (token) {
+        session.user.id = token.id as string | undefined;
+        session.user.accessToken = token.accessToken as string | undefined;
+        session.user.roles = token.roles as string[] | undefined;
+      }
       return session;
     },
   },
-  session: {
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // Maximum session age in seconds (30 days)
-  },
-
   pages: {
-    // signIn: "/auth/signin",
+    signIn: '/auth/signin',
+    error: '/auth/error',
   },
-  jwt: {
-    secret: process.env.JWT_SECRET as string,
+  session: {
+    strategy: 'jwt',
   },
-  secret: process.env.JWT_SECRET as string,
+  secret: process.env.NEXTAUTH_SECRET,
 };
-/**
- * Wrapper for `getServerSession` so that you don't need to import the `authOptions` in every file.
- *
- * @see https://next-auth.js.org/configuration/nextjs
- */
+
 export const getServerAuthSession = () => getServerSession(authOptions);

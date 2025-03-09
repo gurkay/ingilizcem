@@ -71,4 +71,14 @@ public class AuthController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @PostMapping("/_log")
+    public ResponseEntity<String> logUserAction() {
+        return ResponseEntity.ok("User action logged");
+    }
+
+    @GetMapping("/error")
+    public ResponseEntity<String> handleError() {
+        return ResponseEntity.ok("Error handled");
+    }
 }

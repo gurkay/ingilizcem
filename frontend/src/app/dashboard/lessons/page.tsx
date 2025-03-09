@@ -7,12 +7,12 @@ import { getServerAuthSession } from "@/utils/auth";
 async function LessonsPage() {
 
     const session = await getServerAuthSession();
+    console.log('LessonsPage:::session:::', session);
     const roles: IRoleDto[] = (session?.user?.roles || []).map(roleName => ({
         name: roleName,
     }));
-    
     const user: IUserDto = {
-        id: session?.user?.id || 0,
+        id: Number(session?.user?.id) || 0,
         email: session?.user?.email || '',
         roles: roles
     }

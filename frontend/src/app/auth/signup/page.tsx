@@ -1,5 +1,6 @@
 import SignUpForm from "./signUpForm";
-import { getServerAuthSession } from "@/utils/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/utils/auth";
 import { redirect } from "next/navigation";
 
 export const metadata = {
@@ -9,7 +10,7 @@ export const metadata = {
 };
 
 export default async function SignUpPage() {
-  const session = await getServerAuthSession();
+  const session = await getServerSession(authOptions);
 
   if (session) {
     redirect("/dashboard");

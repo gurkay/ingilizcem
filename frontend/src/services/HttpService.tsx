@@ -15,7 +15,8 @@ class HttpService {
 
         this.axiosInstance.interceptors.request.use(async (config) => {
             const session = await getSession();
-            const token = session?.accessToken;
+            console.log('HttpService:::session:::', session);
+            const token = session?.user?.accessToken;
             
             if (token) {
                 config.headers['Authorization'] = `Bearer ${token}`;
