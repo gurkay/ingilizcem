@@ -23,7 +23,7 @@ import com.template.backend.security.services.UserDetailsImpl;
 //create handlers for the endpoints
 @RestController
 @CrossOrigin(origins = "*" , maxAge = 3600)
-@RequestMapping("/api/auth")
+@RequestMapping({"/api/auth", "/auth"})
 public class AuthController {
     private final UserRepository userRepository;
     private final AuthService authService;

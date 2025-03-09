@@ -125,7 +125,7 @@ sudo swapoff /swapfile
 ```
 ## curl commands
 ```
-curl -X POST http://localhost:8080/api/auth/signin -H "Content-Type: application/json" -d '{"email":"user@gmail.com","password":"123456"}'
+curl -X POST http://localhost:8080/api/auth/signin -H "Content-Type: application/json" -d '{"email":"gunesebak@gmail.com","password":"123456"}'
 
 curl -X POST http://localhost:8080/api/auth/signup -H "Content-Type: application/json" -d '{"email":"user@gmail.com","password":"123456"}'
 

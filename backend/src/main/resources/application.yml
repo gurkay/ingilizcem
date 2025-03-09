@@ -1,7 +1,9 @@
 # Set port for the app to run on
 server:
   port: 8080
-
+  # servlet:
+  #   context-path: /api
+    
 debug: true
 
 spring:
