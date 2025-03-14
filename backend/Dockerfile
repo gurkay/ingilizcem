@@ -4,6 +4,8 @@ FROM openjdk:23-jdk-slim
 # Set working directory
 WORKDIR /app
 
+CMD [ "mvn clean package" ]
+
 # Copy the JAR file built by Maven or Gradle
 COPY target/backend-0.0.1-SNAPSHOT.jar app.jar
 
