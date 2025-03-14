@@ -2,6 +2,8 @@ package com.template.backend.controllers;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.HashMap;
 
 import com.template.backend.service.AuthService;
 
@@ -80,5 +82,16 @@ public class AuthController {
     @GetMapping("/error")
     public ResponseEntity<String> handleError() {
         return ResponseEntity.ok("Error handled");
+    }
+
+    @GetMapping("/providers")
+    public ResponseEntity<?> getAuthProviders() {
+        // Örnek olarak desteklenen kimlik doğrulama sağlayıcılarını döndürün
+        Map<String, Object> providers = new HashMap<>();
+        providers.put("credentials", true);
+        // providers.put("google", true);  // İleride eklenebilir
+        // providers.put("facebook", true);  // İleride eklenebilir
+        
+        return ResponseEntity.ok(providers);
     }
 }
