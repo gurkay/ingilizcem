@@ -31,24 +31,11 @@ export const authOptions: NextAuthOptions = {
       name: "Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-        token: { label: "Token", type: "text" }
+        password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
         try {
-          if (credentials?.token) {
-            console.log("Using provided token for authentication");
-            
-            return {
-              id: "user-id",
-              email: credentials.email,
-              name: credentials.email.split('@')[0],
-              accessToken: credentials.token,
-              roles: ["ROLE_USER"],
-            };
-          }
-          
-          const res = await fetch(`${process.env.BACKEND_API_URL}/auth/signin`, {
+          const res = await fetch(`https://ingilizcem.net/api/auth/signin`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -71,10 +58,10 @@ export const authOptions: NextAuthOptions = {
             };
           }
 
-          throw new Error(data.message || "Authentication failed");
+          return null;
         } catch (error) {
           console.error('Auth error:', error);
-          throw new Error("Authentication failed");
+          return null;
         }
       },
     }),
@@ -104,7 +91,7 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt',
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: 'NQOSd8J/wnueoxrzwc9BzoSfxvn5vvT9d+pGowghpUA=',
 };
 
 export const getServerAuthSession = () => getServerSession(authOptions);

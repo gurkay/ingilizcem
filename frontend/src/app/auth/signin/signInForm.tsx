@@ -16,23 +16,20 @@ export default function SignInForm() {
     setIsLoading(true);
 
     try {
-      // Doğrudan NextAuth'u kullan
       const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
       });
 
-      console.log("NextAuth sign in result:", result);
-
-      if (result?.ok) {
+      if (!result?.ok) {
+        toast.error(result?.error || "Invalid credentials");
+      } else {
         toast.success("Login successful");
         setTimeout(() => {
           router.push("/dashboard");
           router.refresh();
         }, 1000);
-      } else {
-        toast.error(result?.error || "Invalid credentials");
       }
     } catch (error) {
       console.error('Sign in error:', error);

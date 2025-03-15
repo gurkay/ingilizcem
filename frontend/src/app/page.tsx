@@ -4,8 +4,8 @@ import Services from "@/app/_components/home/serviceMain";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "NextJS + Java",
-  description: "A Next and Java Spring Project",
+  title: "Ingilizcem",
+  description: "Learn English with Ingilizcem",
 };
 
 const inter = Inter({ subsets: ["latin"] });
