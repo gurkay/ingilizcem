@@ -7,7 +7,7 @@ export default async function apiAuthSignIn(
   try {
     console.log('apiAuthSignIn:::credentials: ', credentials);
     console.log(`apiAuthSignIn:::backend: ${BACKEND_API}/api/auth/signin`);
-    const response = await axios.post(`${BACKEND_API}/api/auth/signin`, {email: credentials?.email, password: credentials?.password}, {
+    const response = await axios.post(`https://ingilizcem.net/api/auth/signin`, {email: credentials?.email, password: credentials?.password}, {
       headers: {
         "Content-Type": "application/json",
       },
