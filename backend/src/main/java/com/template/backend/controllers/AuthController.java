@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import com.template.backend.entities.User;
@@ -98,6 +99,18 @@ public class AuthController {
     @PostMapping("/signin/credentials")
     public ResponseEntity<JwtResponse> authenticateCredentials(@Valid @RequestBody LoginRequest loginRequest) {
         // Mevcut /signin endpoint'inin aynısını çağır
+        return authenticateUser(loginRequest);
+    }
+
+    @PostMapping(value = "/signin/credentials", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
+    public ResponseEntity<JwtResponse> authenticateCredentialsForm(
+            @RequestParam("email") String email,
+            @RequestParam("password") String password) {
+        
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setEmail(email);
+        loginRequest.setPassword(password);
+        
         return authenticateUser(loginRequest);
     }
 }
