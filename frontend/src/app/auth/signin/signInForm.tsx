@@ -16,7 +16,7 @@ export default function SignInForm() {
     setIsLoading(true);
 
     try {
-      console.log("Attempting to sign in with:", { email });
+      console.log("Attempting to sign in with:", { email, password });
       
       const result = await signIn("credentials", {
         email,
@@ -37,11 +37,11 @@ export default function SignInForm() {
           console.log("Redirecting to:", result.url);
         }
         
-        // Add a slight delay before redirecting to allow toast to be seen
-        setTimeout(() => {
-          // Force a hard navigation to dashboard to ensure proper auth state
-          window.location.href = "/dashboard";
-        }, 1500);
+        // // Add a slight delay before redirecting to allow toast to be seen
+        // setTimeout(() => {
+        //   // Force a hard navigation to dashboard to ensure proper auth state
+        //   window.location.href = "/dashboard";
+        // }, 1500);
       }
     } catch (error) {
       console.error('Sign in error:', error);
