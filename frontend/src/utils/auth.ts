@@ -2,13 +2,14 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { DefaultSession } from "next-auth";
 import { getServerSession } from "next-auth";
-import { BACKEND_API } from "./constants";
+import apiAuthSignIn from "./api";
 
 declare module "next-auth" {
   interface User {
     id?: string;
     accessToken?: string;
     roles?: string[];
+    token?: string;
   }
   
   interface Session {
@@ -36,68 +37,52 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         try {
-          const res = await fetch(`${BACKEND_API}/api/auth/signin`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              email: credentials?.email,
-              password: credentials?.password,
-            }),
-          });
-
-          const data = await res.json();
-
-          if (!res.ok) {
-            throw new Error(data.message || "Authentication failed");
+          const result = await apiAuthSignIn(credentials);
+          
+          if (result.error) {
+            throw new Error(result.error);
           }
 
-          if (data.accessToken) {
-            return {
-              id: data.id.toString(),
-              email: data.email,
-              name: data.username,
-              accessToken: data.accessToken,
-              roles: data.roles,
-            };
-          }
-
-          return null;
+          // Backend'den gelen token ve kullanıcı bilgilerini döndür
+          return {
+            id: result.userID,
+            email: credentials?.email,
+            token: result.token,
+            // Diğer gerekli kullanıcı bilgileri...
+          };
         } catch (error) {
-          console.error('Auth error:', error);
           throw new Error("Authentication failed");
         }
-      },
-    }),
+      }
+    })
   ],
+  session: {
+    strategy: "jwt",
+    maxAge: 24 * 60 * 60, // 24 saat
+  },
   callbacks: {
     async jwt({ token, user }) {
+      // user bilgisi varsa token'a ekle
       if (user) {
+        token.accessToken = user.token;
         token.id = user.id;
-        token.accessToken = user.accessToken;
-        token.roles = user.roles;
       }
       return token;
     },
     async session({ session, token }) {
+      // token bilgilerini session'a ekle
       if (token) {
-        session.user.id = token.id;
-        session.user.accessToken = token.accessToken;
-        session.user.roles = token.roles;
+        session.accessToken = token.accessToken as string;
+        session.user.id = token.id as string;
       }
       return session;
-    },
+    }
   },
   pages: {
     signIn: '/auth/signin',
     error: '/auth/error',
   },
-  session: {
-    strategy: 'jwt',
-    maxAge: 24 * 60 * 60, // 24 saat
-  },
   secret: process.env.NEXTAUTH_SECRET || 'NQOSd8J/wnueoxrzwc9BzoSfxvn5vvT9d+pGowghpUA=',
 };
 
-export const getServerAuthSession = () => getServerSession(authOptions); 
+export const getServerAuthSession = () => getServerSession(authOptions);

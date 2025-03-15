@@ -16,7 +16,7 @@ export default function SignInForm() {
     setIsLoading(true);
 
     try {
-      console.log("Attempting to sign in with:", { email, password });
+      console.log("Attempting to sign in with:", { email });
       
       const result = await signIn("credentials", {
         email,
