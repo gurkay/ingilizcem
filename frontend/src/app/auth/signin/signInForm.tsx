@@ -22,6 +22,7 @@ export default function SignInForm() {
         email,
         password,
         redirect: false,
+        callbackUrl: "/dashboard"
       });
 
       console.log("Sign in result:", result);
@@ -31,17 +32,15 @@ export default function SignInForm() {
       } else {
         toast.success("Login successful");
         
-        // Ensure token is properly stored in localStorage if needed
-        // This depends on how your auth system is configured
-        if (result.url) {
-          console.log("Redirecting to:", result.url);
-        }
-        
-        // // Add a slight delay before redirecting to allow toast to be seen
-        // setTimeout(() => {
-        //   // Force a hard navigation to dashboard to ensure proper auth state
-        //   window.location.href = "/dashboard";
-        // }, 1500);
+        setTimeout(() => {
+          if (result.url) {
+            console.log("Redirecting to:", result.url);
+            window.location.href = result.url;
+          } else {
+            console.log("Redirecting to:", "/dashboard");
+            window.location.href = "/dashboard";
+          }
+        }, 1500);
       }
     } catch (error) {
       console.error('Sign in error:', error);

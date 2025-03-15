@@ -2,6 +2,7 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { DefaultSession } from "next-auth";
 import { getServerSession } from "next-auth";
+import apiAuthSignIn from "./api";
 
 declare module "next-auth" {
   interface User {
@@ -35,63 +36,51 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         try {
-          const res = await fetch(`https://ingilizcem.net/api/auth/signin`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              email: credentials?.email,
-              password: credentials?.password,
-            }),
-          });
-
-          const data = await res.json();
-
-          if (res.ok && data.accessToken) {
-            return {
-              id: data.id.toString(),
-              email: data.email,
-              name: data.username,
-              accessToken: data.accessToken,
-              roles: data.roles,
-            };
+          const result = await apiAuthSignIn(credentials);
+          
+          if (result.error) {
+            throw new Error(result.error);
           }
 
-          return null;
+          // Backend'den gelen token ve kullanıcı bilgilerini döndür
+          return {
+            id: result.userID,
+            email: credentials?.email,
+            token: result.token,
+            // Diğer gerekli kullanıcı bilgileri...
+          };
         } catch (error) {
-          console.error('Auth error:', error);
-          return null;
+          throw new Error("Authentication failed");
         }
-      },
-    }),
+      }
+    })
   ],
+  session: {
+    strategy: "jwt",
+    maxAge: 24 * 60 * 60, // 24 saat
+  },
   callbacks: {
     async jwt({ token, user }) {
+      // user bilgisi varsa token'a ekle
       if (user) {
+        token.accessToken = user.token;
         token.id = user.id;
-        token.accessToken = user.accessToken;
-        token.roles = user.roles;
       }
       return token;
     },
     async session({ session, token }) {
+      // token bilgilerini session'a ekle
       if (token) {
-        session.user.id = token.id as string | undefined;
-        session.user.accessToken = token.accessToken as string | undefined;
-        session.user.roles = token.roles as string[] | undefined;
+        session.accessToken = token.accessToken;
+        session.user.id = token.id;
       }
       return session;
-    },
+    }
   },
   pages: {
     signIn: '/auth/signin',
     error: '/auth/error',
-  },
-  session: {
-    strategy: 'jwt',
-  },
-  secret: 'NQOSd8J/wnueoxrzwc9BzoSfxvn5vvT9d+pGowghpUA=',
+  }
 };
 
 export const getServerAuthSession = () => getServerSession(authOptions);
