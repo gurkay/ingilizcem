@@ -1,6 +1,12 @@
 # Build stage
 FROM openjdk:23-jdk-slim AS build
 WORKDIR /app
+
+# Maven yükleme
+RUN apt-get update && \
+    apt-get install -y maven && \
+    apt-get clean
+
 COPY pom.xml .
 COPY src ./src
 RUN mvn clean package -DskipTests
