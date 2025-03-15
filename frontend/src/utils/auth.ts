@@ -33,9 +33,9 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" }
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         try {
-          const res = await fetch(`${process.env.BACKEND_API_URL}/api/auth/signin`, {
+          const res = await fetch(`${process.env.BACKEND_API_URL}/auth/signin`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -58,10 +58,10 @@ export const authOptions: NextAuthOptions = {
             };
           }
 
-          return null;
+          throw new Error(data.message || "Authentication failed");
         } catch (error) {
           console.error('Auth error:', error);
-          return null;
+          throw new Error("Authentication failed");
         }
       },
     }),

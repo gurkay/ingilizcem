@@ -94,4 +94,10 @@ public class AuthController {
         
         return ResponseEntity.ok(providers);
     }
+
+    @PostMapping("/signin/credentials")
+    public ResponseEntity<JwtResponse> authenticateCredentials(@Valid @RequestBody LoginRequest loginRequest) {
+        // Mevcut /signin endpoint'inin aynısını çağır
+        return authenticateUser(loginRequest);
+    }
 }
