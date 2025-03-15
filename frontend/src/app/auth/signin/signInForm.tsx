@@ -17,7 +17,7 @@ export default function SignInForm() {
 
     try {
       // Doğrudan fetch kullanarak JSON formatında istek gönder
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/signin`, {
+      const response = await fetch(`https://ingilizcem.net/api/auth/signin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
