@@ -7,7 +7,7 @@ class HttpService {
 
     private constructor() {
         this.axiosInstance = axios.create({
-            baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080',
+            baseURL: 'https://ingilizcem.net',
             headers: {
                 'Content-Type': 'application/json'
             }

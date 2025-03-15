@@ -68,5 +68,5 @@ export async function apiAuthSignUp(credentials: {
   }
 
 }
-export const BAPI = process.env.BACKEND_API as string;
+export const BAPI = 'http://spring-backend:8080';
 export const Token = process.env.BEARER as string;

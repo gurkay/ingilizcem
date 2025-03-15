@@ -16,20 +16,32 @@ export default function SignInForm() {
     setIsLoading(true);
 
     try {
+      console.log("Attempting to sign in with:", { email });
+      
       const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
       });
 
+      console.log("Sign in result:", result);
+
       if (!result?.ok) {
         toast.error(result?.error || "Invalid credentials");
       } else {
         toast.success("Login successful");
+        
+        // Ensure token is properly stored in localStorage if needed
+        // This depends on how your auth system is configured
+        if (result.url) {
+          console.log("Redirecting to:", result.url);
+        }
+        
+        // Add a slight delay before redirecting to allow toast to be seen
         setTimeout(() => {
-          router.push("/dashboard");
-          router.refresh();
-        }, 1000);
+          // Force a hard navigation to dashboard to ensure proper auth state
+          window.location.href = "/dashboard";
+        }, 1500);
       }
     } catch (error) {
       console.error('Sign in error:', error);
