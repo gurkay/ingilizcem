@@ -16,42 +16,23 @@ export default function SignInForm() {
     setIsLoading(true);
 
     try {
-      // Doğrudan fetch kullanarak JSON formatında istek gönder
-      const response = await fetch(`https://ingilizcem.net/api/auth/signin`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+      // Doğrudan NextAuth'u kullan
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
       });
 
-      const data = await response.json();
+      console.log("NextAuth sign in result:", result);
 
-      if (response.ok && data.accessToken) {
-        // NextAuth oturumunu manuel olarak başlat
-        const result = await signIn("credentials", {
-          redirect: false,
-          email,
-          password,
-          callbackUrl: "/dashboard",
-          // Token'ı session'a eklemek için
-          accessToken: data.accessToken,
-        });
-
-        if (result?.ok) {
-          toast.success("Login successful");
-          setTimeout(() => {
-            router.push("/dashboard");
-            router.refresh();
-          }, 1000);
-        } else {
-          toast.error(result?.error || "Session creation failed");
-        }
+      if (result?.ok) {
+        toast.success("Login successful");
+        setTimeout(() => {
+          router.push("/dashboard");
+          router.refresh();
+        }, 1000);
       } else {
-        toast.error(data.message || "Invalid credentials");
+        toast.error(result?.error || "Invalid credentials");
       }
     } catch (error) {
       console.error('Sign in error:', error);

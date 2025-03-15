@@ -31,10 +31,23 @@ export const authOptions: NextAuthOptions = {
       name: "Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
+        token: { label: "Token", type: "text" }
       },
-      async authorize(credentials, req) {
+      async authorize(credentials) {
         try {
+          if (credentials?.token) {
+            console.log("Using provided token for authentication");
+            
+            return {
+              id: "user-id",
+              email: credentials.email,
+              name: credentials.email.split('@')[0],
+              accessToken: credentials.token,
+              roles: ["ROLE_USER"],
+            };
+          }
+          
           const res = await fetch(`${process.env.BACKEND_API_URL}/auth/signin`, {
             method: 'POST',
             headers: {
