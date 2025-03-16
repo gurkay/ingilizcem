@@ -60,11 +60,12 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http.csrf(csrf -> csrf.disable())
+    http.cors(Customizer.withDefaults())
+        .csrf(csrf -> csrf.disable())
         .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> 
-            auth.requestMatchers("/api/auth/**", "/auth/**").permitAll()
+            auth.requestMatchers("/api/auth/**", "/auth/**", "/api/auth/csrf").permitAll()
                 .requestMatchers("/api/test/**").permitAll()
                 .requestMatchers("/error").permitAll()
                 .requestMatchers("/api/lessons/findByLessonId/**").hasAnyRole("USER", "ADMIN", "MANAGER")
@@ -85,7 +86,14 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOrigins(Arrays.asList("https://ingilizcem.net"));
     configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-    configuration.setAllowedHeaders(Arrays.asList("*"));
+    configuration.setAllowedHeaders(Arrays.asList(
+        "Authorization", 
+        "Content-Type", 
+        "X-Requested-With", 
+        "Accept", 
+        "X-CSRF-Token"
+    ));
+    configuration.setExposedHeaders(Arrays.asList("X-CSRF-Token"));
     configuration.setAllowCredentials(true);
     
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

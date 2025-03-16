@@ -13,6 +13,14 @@ const nextConfig = {
       },
     ]
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api/auth/csrf',
+        destination: 'https://ingilizcem.net/api/auth/csrf',
+      },
+    ]
+  },
 }
 
 module.exports = nextConfig 
