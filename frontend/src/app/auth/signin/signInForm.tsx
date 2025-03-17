@@ -22,7 +22,8 @@ export default function SignInForm() {
         email,
         password,
         redirect: false,
-        callbackUrl: "/dashboard"
+        callbackUrl: "/dashboard",
+        csrfToken: null
       });
 
       console.log("Sign in result:", result);
