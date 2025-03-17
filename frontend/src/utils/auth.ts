@@ -43,12 +43,11 @@ export const authOptions: NextAuthOptions = {
             throw new Error(result.error);
           }
 
-          // Backend'den gelen token ve kullanıcı bilgilerini döndür
           return {
-            id: result.userID,
+            id: result.id?.toString(),
             email: credentials?.email,
-            token: result.token,
-            // Diğer gerekli kullanıcı bilgileri...
+            accessToken: result.accessToken,
+            roles: result.roles
           };
         } catch (error) {
           throw new Error("Authentication failed");
@@ -82,7 +81,8 @@ export const authOptions: NextAuthOptions = {
     signIn: '/auth/signin',
     error: '/auth/error',
   },
-  secret: process.env.NEXTAUTH_SECRET
+  secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === 'development'
 };
 
 export const getServerAuthSession = () => getServerSession(authOptions);

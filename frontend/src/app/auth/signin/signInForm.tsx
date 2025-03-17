@@ -21,9 +21,7 @@ export default function SignInForm() {
       const result = await signIn("credentials", {
         email,
         password,
-        redirect: false,
-        callbackUrl: "/dashboard",
-        csrfToken: null
+        redirect: false
       });
 
       console.log("Sign in result:", result);
