@@ -10,7 +10,6 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -59,8 +58,12 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
     http
         .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(unauthorizedHandler))
         .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .headers(headers -> headers
+            .frameOptions(frame -> frame.deny())
+            .xssProtection(xss -> xss.disable())
+        )
         .authorizeHttpRequests(authorize -> authorize
-            .requestMatchers("/api/auth/**").permitAll()
+            .requestMatchers("/api/auth/**", "/auth/**").permitAll()
             .requestMatchers("/error").permitAll()
             .requestMatchers("/api/lessons/findByLessonId/**").hasAnyRole("USER", "ADMIN", "MANAGER")
             .requestMatchers("/api/lessons/findByUserId/**").hasAnyRole("USER", "ADMIN", "MANAGER")
@@ -69,7 +72,9 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
             .anyRequest().authenticated()
         )
         .cors(Customizer.withDefaults())
-        .csrf(AbstractHttpConfigurer::disable);
+        .csrf(csrf -> csrf
+            .ignoringRequestMatchers("/api/auth/**", "/auth/**")
+        );
 
     http.authenticationProvider(authenticationProvider());
     http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
