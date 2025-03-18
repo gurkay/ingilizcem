@@ -2,8 +2,6 @@ package com.template.backend.controllers;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.Map;
-import java.util.HashMap;
 
 import com.template.backend.service.AuthService;
 
@@ -12,7 +10,6 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import com.template.backend.entities.User;
@@ -26,7 +23,7 @@ import com.template.backend.security.services.UserDetailsImpl;
 //create handlers for the endpoints
 @RestController
 @CrossOrigin(origins = "*" , maxAge = 3600)
-@RequestMapping({"/api/auth", "/auth"})
+@RequestMapping("/api/auth")
 public class AuthController {
     private final UserRepository userRepository;
     private final AuthService authService;
@@ -83,34 +80,5 @@ public class AuthController {
     @GetMapping("/error")
     public ResponseEntity<String> handleError() {
         return ResponseEntity.ok("Error handled");
-    }
-
-    @GetMapping("/providers")
-    public ResponseEntity<?> getAuthProviders() {
-        // Örnek olarak desteklenen kimlik doğrulama sağlayıcılarını döndürün
-        Map<String, Object> providers = new HashMap<>();
-        providers.put("credentials", true);
-        // providers.put("google", true);  // İleride eklenebilir
-        // providers.put("facebook", true);  // İleride eklenebilir
-        
-        return ResponseEntity.ok(providers);
-    }
-
-    @PostMapping("/signin/credentials")
-    public ResponseEntity<JwtResponse> authenticateCredentials(@Valid @RequestBody LoginRequest loginRequest) {
-        // Mevcut /signin endpoint'inin aynısını çağır
-        return authenticateUser(loginRequest);
-    }
-
-    @PostMapping(value = "/signin/credentials", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
-    public ResponseEntity<JwtResponse> authenticateCredentialsForm(
-            @RequestParam("email") String email,
-            @RequestParam("password") String password) {
-        
-        LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setEmail(email);
-        loginRequest.setPassword(password);
-        
-        return authenticateUser(loginRequest);
     }
 }

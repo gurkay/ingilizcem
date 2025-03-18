@@ -16,30 +16,20 @@ export default function SignInForm() {
     setIsLoading(true);
 
     try {
-      console.log("Attempting to sign in with:", { email });
-      
       const result = await signIn("credentials", {
         email,
         password,
-        redirect: false
+        redirect: false,
       });
-
-      console.log("Sign in result:", result);
 
       if (!result?.ok) {
         toast.error(result?.error || "Invalid credentials");
       } else {
         toast.success("Login successful");
-        
         setTimeout(() => {
-          if (result.url) {
-            console.log("Redirecting to:", result.url);
-            window.location.href = result.url;
-          } else {
-            console.log("Redirecting to:", "/dashboard");
-            window.location.href = "/dashboard";
-          }
-        }, 1500);
+          router.push("/dashboard");
+          router.refresh();
+        }, 1000);
       }
     } catch (error) {
       console.error('Sign in error:', error);

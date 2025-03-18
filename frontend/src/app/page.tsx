@@ -4,8 +4,8 @@ import Services from "@/app/_components/home/serviceMain";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Ingilizcem",
-  description: "Learn English with Ingilizcem",
+  title: "ingilizcem",
+  description: "Word master",
 };
 
 const inter = Inter({ subsets: ["latin"] });

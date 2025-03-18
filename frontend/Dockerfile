@@ -13,11 +13,6 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
-# Set environment variables
-ENV NEXTAUTH_URL=http://localhost:3000
-ENV NEXTAUTH_SECRET=NQOSd8J/wnueoxrzwc9BzoSfxvn5vvT9d+pGowghpUA=
-ENV NODE_ENV=production
-
 # Build the application
 RUN npm run build
 

@@ -2,68 +2,38 @@ import axios from "axios";
 import { BACKEND_API, FRONTEND_API } from "./constants";
 
 export default async function apiAuthSignIn(
-  credentials: Record<"email" | "password", string> | undefined
+  credentials: Record<"email" | "password" , string> | undefined
 ) {
   try {
     console.log('apiAuthSignIn:::credentials: ', credentials);
-    
-    // BACKEND_API sabitini kullan
-    const response = await axios.post(`${BACKEND_API}/api/auth/signin`, 
-      {
-        email: credentials?.email, 
-        password: credentials?.password
-      }, 
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        withCredentials: true,
-      }
-    );
-
+    console.log(`apiAuthSignIn:::backend: ${BACKEND_API}/api/auth/signin`);
+    const response = await axios.post(`${BACKEND_API}/api/auth/signin`, {email: credentials?.email, password: credentials?.password}, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      withCredentials: true,
+    });
     console.log('apiAuthSignIn:::response: ', response);
-
-    // Daha detaylı hata yönetimi
-    if (!response.data || response.status !== 200) {
-      throw new Error(response.data?.message || "Authentication failed");
+    if (response.status === 401) {
+      throw new Error("Unauthorized: Invalid username or password");
+    } else if (response.status === 403) {
+      throw new Error("Forbidden: Access denied");
+    } else if (response.status < 200 || response.status >= 300) {
+      throw new Error("An error occurred during sign-in");
     }
 
     const data = response.data;
-    
-    // Token'ı localStorage'a kaydet (eğer gerekiyorsa)
-    if (data.token) {
-      localStorage.setItem('token', data.token);
+    if (data.error) {
+      return { error: data.message };
     }
-
-    return {
-      ...data,
-      status: 'success',
-      ok: true
-    };
-
-  } catch (error: any) {
-    console.error("apiAuthSignIn error:", error);
-    
-    // Daha detaylı hata mesajları
-    if (error.response) {
-      switch (error.response.status) {
-        case 401:
-          return { error: "Invalid credentials", status: 'error', ok: false };
-        case 403:
-          return { error: "Access denied", status: 'error', ok: false };
-        default:
-          return { error: error.response.data?.message || "An error occurred", status: 'error', ok: false };
-      }
-    }
-    
-    return { 
-      error: "Network error - Unable to connect to server", 
-      status: 'error',
-      ok: false 
-    };
+    console.log("apiAuthSignIn:::data::: ", data);
+    const userID = data.userID;
+    return { ...data, userID };
+  } catch (error) {
+    console.log((error as Error)?.message, "No connection to Backend");
+    return error;
   }
 }
-
 export async function apiAuthSignUp(credentials: {
   email: string;
   password: string;
@@ -98,5 +68,5 @@ export async function apiAuthSignUp(credentials: {
   }
 
 }
-export const BAPI = 'http://spring-backend:8080';
+export const BAPI = process.env.BACKEND_API as string;
 export const Token = process.env.BEARER as string;

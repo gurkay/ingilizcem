@@ -2,8 +2,12 @@ version: '3.10'
 services:
   mysql:
     image: mysql:8.0.33
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "0.3"
+    #       memory: "1G"
     container_name: mysql
-    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: rootroot
       MYSQL_DATABASE: wordmasterdb
@@ -11,6 +15,8 @@ services:
       MYSQL_PASSWORD: wordmaster123
       MYSQL_MAX_ALLOWED_PACKET: 128M
       TZ: UTC
+    ports:
+      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./mysql-init/init.sql:/docker-entrypoint-initdb.d/1-init.sql
@@ -34,13 +40,18 @@ services:
 
   backend:
     build: ./backend
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "0.4"
+    #       memory: "1G"
     container_name: spring-backend
-    restart: always
+    ports:
+      - "8080:8080"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/wordmasterdb?allowPublicKeyRetrieval=true&useSSL=false
       - SPRING_DATASOURCE_USERNAME=wordmaster
       - SPRING_DATASOURCE_PASSWORD=wordmaster123
-      - SERVER_SERVLET_CONTEXT_PATH=/
     depends_on:
       mysql:
         condition: service_healthy
@@ -49,13 +60,18 @@ services:
 
   frontend:
     build: ./frontend
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "0.3"
+    #       memory: "1G"
     container_name: nextjs-frontend
-    restart: always
+    ports:
+      - "3000:3000"
     environment:
       - BACKEND_API_URL=http://spring-backend:8080
-      - NEXT_PUBLIC_API_URL=https://www.ingilizcem.net/api
-      - NEXT_PUBLIC_FRONTEND_URL=https://www.ingilizcem.net
-      - NEXTAUTH_URL=https://www.ingilizcem.net
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+      - NEXTAUTH_URL=http://localhost:3000
       - NEXTAUTH_SECRET=NQOSd8J/wnueoxrzwc9BzoSfxvn5vvT9d+pGowghpUA=
     depends_on:
       - backend
@@ -65,7 +81,6 @@ services:
   nginx:
     image: nginx:stable
     container_name: nginx-prod
-    restart: always
     ports:
       - "80:80"
       - "443:443"
@@ -80,6 +95,7 @@ services:
       - backend
     networks: 
       - app-network
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 30s
@@ -91,7 +107,7 @@ services:
     volumes:
       - ./certbot/www:/var/www/certbot
       - /etc/letsencrypt:/etc/letsencrypt
-    command: certonly --webroot -w /var/www/certbot --force-renewal --email gurkay.basyigit@gmail.com -d ingilizcem.net -d www.ingilizcem.net --agree-tos
+    command: certonly --webroot -w /var/www/certbot --force-renewal --email gurkay.basyigit@gmail.com -d ingilizcem.com -d www.ingilizcem.com --agree-tos
 
 volumes:
   mysql_data:
