@@ -16,12 +16,14 @@ export default function SignInForm() {
     setIsLoading(true);
 
     try {
+      console.log("signInForm:::handleSubmit");
       const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
+        // callbackUrl: "/dashboard",
       });
-
+      console.log("signInForm:::result", result);
       if (!result?.ok) {
         toast.error(result?.error || "Invalid credentials");
       } else {
