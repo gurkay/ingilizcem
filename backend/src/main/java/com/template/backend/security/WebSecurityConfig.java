@@ -18,9 +18,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.firewall.DefaultHttpFirewall;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.template.backend.security.jwt.AuthEntryPointJwt;
 import com.template.backend.security.jwt.AuthTokenFilter;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
@@ -62,6 +68,20 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
   }
 
   @Bean
+  public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration = new CorsConfiguration();
+    configuration.setAllowedOrigins(Collections.singletonList("*"));
+    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+    configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token"));
+    configuration.setExposedHeaders(Arrays.asList("x-auth-token"));
+    configuration.setAllowCredentials(false);
+    
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
+  }
+
+  @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
         .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(unauthorizedHandler))
@@ -78,7 +98,7 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
             .requestMatchers("/api/user-words/findByUserIdAndStatus/**").hasAnyRole("USER", "ADMIN", "MANAGER")
             .anyRequest().authenticated()
         )
-        .cors(Customizer.withDefaults())
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .csrf(csrf -> csrf
             .ignoringRequestMatchers("/api/auth/**", "/auth/**", "/", "/error", "/actuator/**")
         );

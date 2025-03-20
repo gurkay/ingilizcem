@@ -16,13 +16,15 @@ export default function SignInForm() {
     setIsLoading(true);
 
     try {
-      console.log("signInForm:::handleSubmit");
+      console.log("Signing in with credentials:", { email });
       const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
+        callbackUrl: "/dashboard"
       });
-      console.log("signInForm:::result", result);
+      
+      console.log("Sign in result:", result);
       
       if (!result?.ok) {
         if (result?.error === "CredentialsSignin") {
@@ -30,6 +32,7 @@ export default function SignInForm() {
         } else {
           toast.error(result?.error || "Authentication failed");
         }
+        setIsLoading(false);
       } else {
         toast.success("Login successful");
         setTimeout(() => {
@@ -40,7 +43,6 @@ export default function SignInForm() {
     } catch (error) {
       console.error('Sign in error:', error);
       toast.error("An error occurred during sign in. Please try again.");
-    } finally {
       setIsLoading(false);
     }
   }

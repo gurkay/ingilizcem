@@ -75,12 +75,26 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/providers")
+    public ResponseEntity<?> getAuthProviders() {
+        logger.info("Getting authentication providers");
+        // NextAuth will call this endpoint to get authentication providers
+        return ResponseEntity.ok("credentials");
+    }
+
     @GetMapping("/{email}")
     public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
         try {
+            logger.info("Getting user by email: {}", email);
             User user = authService.getUserByEmail(email);
-            return ResponseEntity.ok(user);
+            if (user != null) {
+                return ResponseEntity.ok(user);
+            } else {
+                logger.info("User not found for email: {}", email);
+                return ResponseEntity.notFound().build();
+            }
         } catch (Exception e) {
+            logger.error("Error retrieving user by email: ", e);
             return ResponseEntity.notFound().build();
         }
     }

@@ -47,17 +47,19 @@ export const authOptions: NextAuthOptions = {
           });
 
           const data = await res.json();
+          console.log("NextAuth authorize response:", data);
 
-          if (res.ok && data.accessToken) {
+          if (res.ok && data) {
             return {
-              id: data.id.toString(),
-              email: data.email,
+              id: data.id?.toString(),
+              email: data.email || data.username,
               name: data.username,
-              accessToken: data.accessToken,
+              accessToken: data.accessToken || data.token,
               roles: data.roles,
             };
           }
 
+          console.error("Authentication failed:", data);
           return null;
         } catch (error) {
           console.error('Auth error:', error);
@@ -91,6 +93,7 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt',
   },
+  debug: process.env.NODE_ENV === 'development',
   secret: process.env.NEXTAUTH_SECRET,
 };
 
