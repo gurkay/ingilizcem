@@ -21,11 +21,15 @@ export default function SignInForm() {
         email,
         password,
         redirect: false,
-        // callbackUrl: "/dashboard",
       });
       console.log("signInForm:::result", result);
+      
       if (!result?.ok) {
-        toast.error(result?.error || "Invalid credentials");
+        if (result?.error === "CredentialsSignin") {
+          toast.error("Invalid email or password");
+        } else {
+          toast.error(result?.error || "Authentication failed");
+        }
       } else {
         toast.success("Login successful");
         setTimeout(() => {
@@ -35,7 +39,7 @@ export default function SignInForm() {
       }
     } catch (error) {
       console.error('Sign in error:', error);
-      toast.error("An error occurred during sign in");
+      toast.error("An error occurred during sign in. Please try again.");
     } finally {
       setIsLoading(false);
     }

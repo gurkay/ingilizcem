@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,30 +37,42 @@ public class AuthController {
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     @PostMapping("/signin")
-    public ResponseEntity<JwtResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-        logger.info("authenticateUser");
-        String jwt = authService.authenticate(loginRequest);
-        logger.info("authenticateUser:::jwt:::" + jwt);
-        System.out.println("authenticateUser:::jwt:::" + jwt);
-        UserDetailsImpl userDetails = (UserDetailsImpl) authService.getUserDetails(loginRequest.getEmail());
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(item -> item.getAuthority())
-                .collect(Collectors.toList());
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+        try {
+            logger.info("authenticateUser");
+            String jwt = authService.authenticate(loginRequest);
+            logger.info("authenticateUser:::jwt:::" + jwt);
+            
+            UserDetailsImpl userDetails = (UserDetailsImpl) authService.getUserDetails(loginRequest.getEmail());
+            List<String> roles = userDetails.getAuthorities().stream()
+                    .map(item -> item.getAuthority())
+                    .collect(Collectors.toList());
 
-        return ResponseEntity.ok(new JwtResponse(jwt,
-                userDetails.getId(),
-                userDetails.getUsername(),
-                userDetails.getEmail(),
-                roles));
+            return ResponseEntity.ok(new JwtResponse(jwt,
+                    userDetails.getId(),
+                    userDetails.getUsername(),
+                    userDetails.getEmail(),
+                    roles));
+        } catch (Exception e) {
+            logger.error("Authentication error: ", e);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new MessageResponse("Invalid email or password"));
+        }
     }
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-        authService.validateSignupRequest(signUpRequest);
-        User user = authService.createNewUser(signUpRequest);
-        userRepository.save(user);
+        try {
+            authService.validateSignupRequest(signUpRequest);
+            User user = authService.createNewUser(signUpRequest);
+            userRepository.save(user);
 
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+            return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+        } catch (Exception e) {
+            logger.error("Registration error: ", e);
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse("Error: " + e.getMessage()));
+        }
     }
 
     @GetMapping("/{email}")
