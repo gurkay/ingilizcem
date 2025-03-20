@@ -15,6 +15,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.firewall.DefaultHttpFirewall;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 
 import com.template.backend.security.jwt.AuthEntryPointJwt;
 import com.template.backend.security.jwt.AuthTokenFilter;
@@ -54,6 +57,11 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
   }
 
   @Bean
+  public HttpFirewall defaultHttpFirewall() {
+    return new DefaultHttpFirewall();
+  }
+
+  @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
         .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(unauthorizedHandler))
@@ -63,8 +71,7 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
             .xssProtection(xss -> xss.disable())
         )
         .authorizeHttpRequests(authorize -> authorize
-            .requestMatchers("/api/auth/**", "/auth/**").permitAll()
-            .requestMatchers("/error").permitAll()
+            .requestMatchers("/api/auth/**", "/auth/**", "/", "/error", "/actuator/**").permitAll()
             .requestMatchers("/api/lessons/findByLessonId/**").hasAnyRole("USER", "ADMIN", "MANAGER")
             .requestMatchers("/api/lessons/findByUserId/**").hasAnyRole("USER", "ADMIN", "MANAGER")
             .requestMatchers("/api/lessons/updateWordStatus/**").hasAnyRole("USER", "ADMIN", "MANAGER")
@@ -73,7 +80,7 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
         )
         .cors(Customizer.withDefaults())
         .csrf(csrf -> csrf
-            .ignoringRequestMatchers("/api/auth/**", "/auth/**")
+            .ignoringRequestMatchers("/api/auth/**", "/auth/**", "/", "/error", "/actuator/**")
         );
 
     http.authenticationProvider(authenticationProvider());

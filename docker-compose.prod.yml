@@ -32,11 +32,13 @@ services:
       --max_allowed_packet=128M
       --bind-address=0.0.0.0
       --secure-file-priv=/var/lib/mysql-files
+      --init-connect='SET NAMES utf8mb4'
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "wordmaster", "-pwordmaster123"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
     security_opt:
       - no-new-privileges:true
 
@@ -51,9 +53,10 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/wordmasterdb?allowPublicKeyRetrieval=true&useSSL=false
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/wordmasterdb?allowPublicKeyRetrieval=true&useSSL=false&createDatabaseIfNotExist=true
       - SPRING_DATASOURCE_USERNAME=wordmaster
       - SPRING_DATASOURCE_PASSWORD=wordmaster123
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     depends_on:
       mysql:
         condition: service_healthy
