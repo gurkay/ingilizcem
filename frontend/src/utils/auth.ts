@@ -39,15 +39,18 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          // Ensure we have a valid API URL
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-          if (!apiUrl) {
-            console.error('NEXT_PUBLIC_API_URL is not defined');
-            throw new Error('API URL configuration error');
+          // Ensure we have a valid API URL - fallback to a hard-coded value if needed
+          let baseUrl = process.env.NEXT_PUBLIC_API_URL;
+          if (!baseUrl) {
+            console.error('NEXT_PUBLIC_API_URL is not defined, using fallback');
+            baseUrl = 'https://ingilizcem.net';
           }
-
+          
           // Remove trailing slash if present
-          const baseUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+          if (baseUrl.endsWith('/')) {
+            baseUrl = baseUrl.slice(0, -1);
+          }
+          
           console.log('Auth baseUrl:', baseUrl);
           
           const res = await fetch(`${baseUrl}/api/auth/signin`, {
@@ -115,8 +118,8 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  secret: process.env.NEXTAUTH_SECRET,
-  debug: process.env.NODE_ENV === 'development',
+  secret: process.env.NEXTAUTH_SECRET || 'NQOSd8J/wnueoxrzwc9BzoSfxvn5vvT9d+pGowghpUA=',
+  debug: process.env.NODE_ENV !== 'production',
 };
 
 export const getServerAuthSession = () => getServerSession(authOptions);
