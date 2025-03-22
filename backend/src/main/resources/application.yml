@@ -30,23 +30,14 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant-path-matcher
-  # Add more flexible CORS handling for preflight requests
-  web:
-    cors:
-      allowed-origins: "*"
-      allowed-methods: "*"
-      allowed-headers: "*"
-      exposed-headers: "*"
-      allow-credentials: false
-      max-age: 3600
 
 app:
   cors:
-    allowed-origins: '*'
-    allowed-methods: GET,POST,PUT,DELETE,OPTIONS,PATCH
-    allowed-headers: '*'
-    exposed-headers: Authorization,Access-Control-Allow-Origin,Access-Control-Allow-Credentials,Access-Control-Allow-Headers
-    allow-credentials: false
+    allowed-origins: https://ingilizcem.net, http://localhost:3000
+    allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+    allowed-headers: Authorization,Content-Type
+    exposed-headers: Authorization
+    allow-credentials: true
     max-age: 3600
     
 saas:
@@ -58,5 +49,4 @@ logging:
   level:
     org.springframework.security: DEBUG
     com.template.backend: DEBUG
-    org.springframework.web: DEBUG
     # org.hibernate.SQL: DEBUG

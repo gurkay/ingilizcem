@@ -1,7 +1,7 @@
 "use client";
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -10,42 +10,20 @@ export default function SignInForm() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
-
-  // Check for error parameter in URL
-  useEffect(() => {
-    const error = searchParams.get('error');
-    if (error) {
-      if (error === 'CredentialsSignin') {
-        toast.error("Invalid email or password");
-      } else {
-        toast.error("Authentication failed: " + error);
-      }
-    }
-  }, [searchParams]);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setIsLoading(true);
 
     try {
-      console.log("Signing in with credentials:", { email });
       const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
-        callbackUrl: "/dashboard"
       });
-      
-      console.log("Sign in result:", result);
-      
+
       if (!result?.ok) {
-        if (result?.error === "CredentialsSignin") {
-          toast.error("Invalid email or password");
-        } else {
-          toast.error(result?.error || "Authentication failed");
-        }
-        setIsLoading(false);
+        toast.error(result?.error || "Invalid credentials");
       } else {
         toast.success("Login successful");
         setTimeout(() => {
@@ -55,7 +33,8 @@ export default function SignInForm() {
       }
     } catch (error) {
       console.error('Sign in error:', error);
-      toast.error("An error occurred during sign in. Please try again.");
+      toast.error("An error occurred during sign in");
+    } finally {
       setIsLoading(false);
     }
   }

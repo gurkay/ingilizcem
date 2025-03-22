@@ -2,11 +2,11 @@ version: '3.10'
 services:
   mysql:
     image: mysql:8.0.33
-    deploy:
-      resources:
-        limits:
-          cpus: "0.3"
-          memory: "1G"
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "0.3"
+    #       memory: "1G"
     container_name: mysql
     environment:
       MYSQL_ROOT_PASSWORD: rootroot
@@ -32,38 +32,31 @@ services:
       --max_allowed_packet=128M
       --bind-address=0.0.0.0
       --secure-file-priv=/var/lib/mysql-files
-      --init-connect='SET NAMES utf8mb4'
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "wordmaster", "-pwordmaster123"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
-    security_opt:
-      - no-new-privileges:true
 
   backend:
     build: ./backend
-    deploy:
-      resources:
-        limits:
-          cpus: "0.4"
-          memory: "1G"
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "0.4"
+    #       memory: "1G"
     container_name: spring-backend
     ports:
       - "8080:8080"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/wordmasterdb?allowPublicKeyRetrieval=true&useSSL=false&createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/wordmasterdb?allowPublicKeyRetrieval=true&useSSL=false
       - SPRING_DATASOURCE_USERNAME=wordmaster
       - SPRING_DATASOURCE_PASSWORD=wordmaster123
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     depends_on:
       mysql:
         condition: service_healthy
     networks:
       - app-network
-    security_opt:
-      - no-new-privileges:true
 
   frontend:
     build: ./frontend
@@ -116,84 +109,8 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt
     command: certonly --webroot -w /var/www/certbot --force-renewal --email gurkay.basyigit@gmail.com -d ingilizcem.com -d www.ingilizcem.com --agree-tos
 
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    volumes:
-      - ./prometheus:/etc/prometheus
-      - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
-    ports:
-      - "9090:9090"
-    networks:
-      - app-network
-
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    volumes:
-      - grafana_data:/var/lib/grafana
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_USERS_ALLOW_SIGN_UP=false
-    ports:
-      - "3001:3000"
-    depends_on:
-      - prometheus
-    networks:
-      - app-network
-
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.9
-    container_name: elasticsearch
-    environment:
-      - discovery.type=single-node
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data
-    ports:
-      - "9200:9200"
-    networks:
-      - app-network
-
-  logstash:
-    image: docker.elastic.co/logstash/logstash:7.17.9
-    container_name: logstash
-    volumes:
-      - ./logstash/pipeline:/usr/share/logstash/pipeline
-      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
-    environment:
-      - "LS_JAVA_OPTS=-Xms256m -Xmx256m"
-    ports:
-      - "5044:5044"
-      - "5000:5000"
-      - "5000:5000/udp"
-    depends_on:
-      - elasticsearch
-    networks:
-      - app-network
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.17.9
-    container_name: kibana
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    ports:
-      - "5601:5601"
-    depends_on:
-      - elasticsearch
-    networks:
-      - app-network
-
 volumes:
   mysql_data:
-  prometheus_data:
-  grafana_data:
-  elasticsearch_data:
 
 networks:
   app-network:

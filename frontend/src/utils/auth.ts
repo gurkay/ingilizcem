@@ -35,11 +35,7 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         try {
-          // Get the backend URL from environment variables or use a default if not available
-          const backendUrl = process.env.BACKEND_API_URL || 'http://localhost:8080';
-          console.log("Using backend URL:", backendUrl);
-          
-          const res = await fetch(`${backendUrl}/api/auth/signin`, {
+          const res = await fetch(`${process.env.BACKEND_API_URL}/api/auth/signin`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -51,19 +47,17 @@ export const authOptions: NextAuthOptions = {
           });
 
           const data = await res.json();
-          console.log("NextAuth authorize response:", data);
 
-          if (res.ok && data) {
+          if (res.ok && data.accessToken) {
             return {
-              id: data.id?.toString(),
-              email: data.email || data.username,
+              id: data.id.toString(),
+              email: data.email,
               name: data.username,
-              accessToken: data.accessToken || data.token,
+              accessToken: data.accessToken,
               roles: data.roles,
             };
           }
 
-          console.error("Authentication failed:", data);
           return null;
         } catch (error) {
           console.error('Auth error:', error);
@@ -92,13 +86,11 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/auth/signin',
-    // Use a client-side error page instead of API route
-    error: '/auth/signin?error=true',
+    error: '/auth/error',
   },
   session: {
     strategy: 'jwt',
   },
-  debug: process.env.NODE_ENV === 'development',
   secret: process.env.NEXTAUTH_SECRET,
 };
 
