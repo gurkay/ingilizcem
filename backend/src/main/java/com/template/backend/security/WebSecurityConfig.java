@@ -18,15 +18,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.firewall.DefaultHttpFirewall;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+import org.springframework.http.HttpMethod;
 
 import com.template.backend.security.jwt.AuthEntryPointJwt;
 import com.template.backend.security.jwt.AuthTokenFilter;
-
-import java.util.Arrays;
-import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
@@ -36,6 +32,9 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
 
   @Autowired
   private AuthEntryPointJwt unauthorizedHandler;
+  
+  @Autowired
+  private CorsFilter corsFilter;
 
   @Bean
   public AuthTokenFilter authenticationJwtTokenFilter() {
@@ -68,20 +67,6 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
   }
 
   @Bean
-  public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(Collections.singletonList("*"));
-    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-    configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token"));
-    configuration.setExposedHeaders(Arrays.asList("x-auth-token"));
-    configuration.setAllowCredentials(false);
-    
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", configuration);
-    return source;
-  }
-
-  @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
         .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(unauthorizedHandler))
@@ -91,6 +76,8 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
             .xssProtection(xss -> xss.disable())
         )
         .authorizeHttpRequests(authorize -> authorize
+            // Allow OPTIONS requests for CORS preflight
+            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             .requestMatchers("/api/auth/**", "/auth/**", "/", "/error", "/actuator/**").permitAll()
             .requestMatchers("/api/lessons/findByLessonId/**").hasAnyRole("USER", "ADMIN", "MANAGER")
             .requestMatchers("/api/lessons/findByUserId/**").hasAnyRole("USER", "ADMIN", "MANAGER")
@@ -98,11 +85,10 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
             .requestMatchers("/api/user-words/findByUserIdAndStatus/**").hasAnyRole("USER", "ADMIN", "MANAGER")
             .anyRequest().authenticated()
         )
-        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-        .csrf(csrf -> csrf
-            .ignoringRequestMatchers("/api/auth/**", "/auth/**", "/", "/error", "/actuator/**")
-        );
+        .csrf(csrf -> csrf.disable());  // Disable CSRF for REST APIs with JWT
 
+    // Add the CORS filter before the security filter
+    http.addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class);
     http.authenticationProvider(authenticationProvider());
     http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 

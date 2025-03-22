@@ -1,5 +1,56 @@
-import axios from "axios";
+import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import { BACKEND_API, FRONTEND_API } from "./constants";
+import { getSession } from "next-auth/react";
+
+// Create a configured Axios instance for authenticated requests
+export const createAuthenticatedApi = async (): Promise<AxiosInstance> => {
+  const session = await getSession();
+  
+  const api = axios.create({
+    baseURL: BACKEND_API,
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  
+  // Add request interceptor to add token to all requests
+  api.interceptors.request.use(
+    async (config) => {
+      // If token exists in session, add it to request header
+      if (session?.user?.accessToken) {
+        config.headers.Authorization = `Bearer ${session.user.accessToken}`;
+      }
+      return config;
+    },
+    (error) => {
+      return Promise.reject(error);
+    }
+  );
+  
+  return api;
+};
+
+// Helper function to make authenticated requests
+export const authFetch = async (
+  url: string, 
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
+  data?: any
+) => {
+  try {
+    const api = await createAuthenticatedApi();
+    const config: AxiosRequestConfig = { url, method };
+    
+    if (data) {
+      config.data = data;
+    }
+    
+    const response = await api(config);
+    return response.data;
+  } catch (error) {
+    console.error('API request failed:', error);
+    throw error;
+  }
+};
 
 export default async function apiAuthSignIn(
   credentials: Record<"email" | "password" , string> | undefined
