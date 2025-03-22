@@ -35,7 +35,11 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         try {
-          const res = await fetch(`${process.env.BACKEND_API_URL}/api/auth/signin`, {
+          // Get the backend URL from environment variables or use a default if not available
+          const backendUrl = process.env.BACKEND_API_URL || 'http://localhost:8080';
+          console.log("Using backend URL:", backendUrl);
+          
+          const res = await fetch(`${backendUrl}/api/auth/signin`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -88,7 +92,8 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/auth/signin',
-    error: '/auth/error',
+    // Use a client-side error page instead of API route
+    error: '/auth/signin?error=true',
   },
   session: {
     strategy: 'jwt',

@@ -6,8 +6,12 @@ class HttpService {
     private axiosInstance: AxiosInstance;
 
     private constructor() {
+        // Get API URL from environment variables or use a default
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+        console.log('Initializing HttpService with API URL:', apiUrl);
+        
         this.axiosInstance = axios.create({
-            baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080',
+            baseURL: apiUrl,
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
@@ -49,6 +53,8 @@ class HttpService {
                     } else if (error.response.status === 401) {
                         console.error('Unauthorized - Token may be invalid');
                         // Potentially redirect to login page
+                    } else if (error.response.status === 502) {
+                        console.error('Bad Gateway - Backend server might be down or incorrectly configured');
                     }
                 } else if (error.request) {
                     // The request was made but no response was received
