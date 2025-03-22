@@ -24,6 +24,9 @@ public class CorsConfig {
         allowedOrigins.add("http://www.ingilizcem.net");
         allowedOrigins.add("https://www.ingilizcem.net");
         allowedOrigins.add("http://localhost:3000");
+        allowedOrigins.add("http://localhost:8080");
+        allowedOrigins.add("https://localhost:8080");
+        allowedOrigins.add("http://localhost:80");
         configuration.setAllowedOrigins(allowedOrigins);
         
         // Allowed methods
