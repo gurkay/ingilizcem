@@ -34,8 +34,20 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials, req) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error('Email and password are required');
+        }
+
         try {
-          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://ingilizcem.net';
+          // Ensure we have a valid API URL
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+          if (!apiUrl) {
+            console.error('NEXT_PUBLIC_API_URL is not defined');
+            throw new Error('API URL configuration error');
+          }
+
+          // Remove trailing slash if present
+          const baseUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
           console.log('Auth baseUrl:', baseUrl);
           
           const res = await fetch(`${baseUrl}/api/auth/signin`, {
@@ -44,8 +56,8 @@ export const authOptions: NextAuthOptions = {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              email: credentials?.email,
-              password: credentials?.password,
+              email: credentials.email,
+              password: credentials.password,
             }),
           });
 
@@ -53,19 +65,22 @@ export const authOptions: NextAuthOptions = {
           console.log('Auth response:', data);
 
           if (!res.ok) {
-            throw new Error(data.message || 'Authentication failed');
+            const errorMessage = data.message || `HTTP error! status: ${res.status}`;
+            console.error('Auth failed:', errorMessage);
+            throw new Error(errorMessage);
           }
 
           if (!data.accessToken) {
+            console.error('No access token in response:', data);
             throw new Error('No access token received');
           }
 
           return {
-            id: data.id.toString(),
-            email: data.email,
-            name: data.username,
+            id: data.id?.toString() || '0',
+            email: data.email || credentials.email,
+            name: data.username || data.name || credentials.email,
             accessToken: data.accessToken,
-            roles: data.roles,
+            roles: Array.isArray(data.roles) ? data.roles : [],
           };
         } catch (error) {
           console.error('Auth error:', error);

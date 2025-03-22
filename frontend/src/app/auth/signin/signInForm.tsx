@@ -15,28 +15,40 @@ export default function SignInForm() {
     event.preventDefault();
     setIsLoading(true);
 
+    if (!email || !password) {
+      toast.error("Email and password are required");
+      setIsLoading(false);
+      return;
+    }
+
     try {
+      console.log('Attempting sign in with:', { email });
+      
       const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
-        callbackUrl: "/dashboard",
       });
 
       console.log("Sign in result:", result);
 
       if (!result?.ok) {
-        toast.error(result?.error || "Invalid credentials");
-      } else {
-        toast.success("Login successful");
-        setTimeout(() => {
-          router.push("/dashboard");
-          router.refresh();
-        }, 1000);
+        const errorMessage = result?.error || "Invalid credentials";
+        console.error('Sign in failed:', errorMessage);
+        toast.error(errorMessage);
+        return;
       }
+
+      toast.success("Login successful");
+      
+      // Wait for the toast to be visible before redirecting
+      setTimeout(() => {
+        router.push("/dashboard");
+        router.refresh();
+      }, 1000);
     } catch (error) {
       console.error('Sign in error:', error);
-      toast.error("An error occurred during sign in");
+      toast.error(error instanceof Error ? error.message : "An error occurred during sign in");
     } finally {
       setIsLoading(false);
     }
