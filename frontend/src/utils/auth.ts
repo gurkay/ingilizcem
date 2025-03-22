@@ -33,9 +33,10 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" }
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         try {
-          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/signin`, {
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://ingilizcem.net';
+          const res = await fetch(`${baseUrl}/api/auth/signin`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -59,10 +60,10 @@ export const authOptions: NextAuthOptions = {
             };
           }
 
-          return null;
+          throw new Error(data.message || 'Authentication failed');
         } catch (error) {
           console.error('Auth error:', error);
-          return null;
+          throw error;
         }
       },
     }),
@@ -91,9 +92,10 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.NEXTAUTH_SECRET,
-  debug: true,
+  debug: process.env.NODE_ENV === 'development',
 };
 
 export const getServerAuthSession = () => getServerSession(authOptions);
