@@ -36,6 +36,7 @@ export default function SignInForm() {
         const errorMessage = result?.error || "Invalid credentials";
         console.error('Sign in failed:', errorMessage);
         toast.error(errorMessage);
+        setIsLoading(false);
         return;
       }
 
@@ -49,7 +50,6 @@ export default function SignInForm() {
     } catch (error) {
       console.error('Sign in error:', error);
       toast.error(error instanceof Error ? error.message : "An error occurred during sign in");
-    } finally {
       setIsLoading(false);
     }
   }

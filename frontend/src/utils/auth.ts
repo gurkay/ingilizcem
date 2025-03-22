@@ -109,6 +109,26 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
+    async redirect({ url, baseUrl }) {
+      // Handle redirects safely to prevent URL construction errors
+      try {
+        // If the URL is relative, prepend the base URL
+        if (url.startsWith('/')) {
+          return `${baseUrl}${url}`;
+        }
+        
+        // Check if the URL is from the same origin
+        if (url.startsWith(baseUrl)) {
+          return url;
+        }
+        
+        // Default to dashboard if there's any issue
+        return `${baseUrl}/dashboard`;
+      } catch (error) {
+        console.error('Redirect error:', error);
+        return `${baseUrl}/dashboard`;
+      }
+    }
   },
   pages: {
     signIn: '/auth/signin',
