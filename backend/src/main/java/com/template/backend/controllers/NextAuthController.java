@@ -52,5 +52,31 @@ public class NextAuthController {
         return ResponseEntity.ok().build();
     }
     
+    @PostMapping({"/auth/callback/credentials", "/api/auth/callback/credentials"})
+    public ResponseEntity<?> callbackCredentials(@RequestBody Map<String, Object> requestBody) {
+        logger.info("NextAuth: /auth/callback/credentials veya /api/auth/callback/credentials endpoint çağrıldı");
+        logger.info("Callback request body: {}", requestBody);
+        
+        // This endpoint should process the credentials and return a user object
+        // For now, we'll return a simple success response
+        Map<String, Object> user = new HashMap<>();
+        user.put("id", "1");
+        user.put("name", "Test User");
+        user.put("email", "test@example.com");
+        
+        return ResponseEntity.ok(user);
+    }
+    
+    @GetMapping({"/auth/csrf", "/api/auth/csrf"})
+    public ResponseEntity<?> getCsrf() {
+        logger.info("NextAuth: /auth/csrf veya /api/auth/csrf endpoint çağrıldı");
+        
+        // NextAuth expects a CSRF token
+        Map<String, Object> response = new HashMap<>();
+        response.put("csrfToken", "dummy-csrf-token");
+        
+        return ResponseEntity.ok(response);
+    }
+    
     // Eğer gerekirse diğer NextAuth endpoint'leri buraya eklenebilir
 } 
