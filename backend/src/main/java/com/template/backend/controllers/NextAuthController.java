@@ -23,16 +23,18 @@ public class NextAuthController {
     public ResponseEntity<?> getProviders() {
         logger.info("NextAuth: /auth/providers endpoint çağrıldı");
         
-        // NextAuth için gerekli credentials provider
-        Map<String, Object> credentialsProvider = new HashMap<>();
-        credentialsProvider.put("id", "credentials");
-        credentialsProvider.put("name", "Credentials");
-        credentialsProvider.put("type", "credentials");
+        // NextAuth credentials provider configuration
+        Map<String, Object> credentials = new HashMap<>();
+        credentials.put("id", "credentials");
+        credentials.put("name", "Credentials");
+        credentials.put("type", "credentials");
+        credentials.put("signinUrl", "/api/auth/signin");
         
-        Map<String, Object> providers = new HashMap<>();
-        providers.put("credentials", credentialsProvider);
+        Map<String, Object> response = new HashMap<>();
+        response.put("credentials", credentials);
         
-        return ResponseEntity.ok(providers);
+        logger.info("Returning NextAuth providers: {}", response);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/error")

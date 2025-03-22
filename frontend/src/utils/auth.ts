@@ -47,6 +47,7 @@ export const authOptions: NextAuthOptions = {
           });
 
           const data = await res.json();
+          console.log('Auth response:', data);
 
           if (res.ok && data.accessToken) {
             return {
