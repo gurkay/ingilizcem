@@ -52,17 +52,49 @@ public class NextAuthController {
         return ResponseEntity.ok().build();
     }
     
-    @PostMapping({"/auth/callback/credentials", "/api/auth/callback/credentials"})
-    public ResponseEntity<?> callbackCredentials(@RequestBody Map<String, Object> requestBody) {
+    @PostMapping(value = {"/auth/callback/credentials", "/api/auth/callback/credentials"}, 
+                consumes = {"application/x-www-form-urlencoded;charset=UTF-8", "application/json"})
+    public ResponseEntity<?> callbackCredentials(@RequestParam(required = false) Map<String, String> formData, 
+                                               @RequestBody(required = false) Map<String, Object> jsonData) {
         logger.info("NextAuth: /auth/callback/credentials veya /api/auth/callback/credentials endpoint çağrıldı");
-        logger.info("Callback request body: {}", requestBody);
         
-        // This endpoint should process the credentials and return a user object
-        // For now, we'll return a simple success response
+        // Log the request data for debugging
+        if (formData != null && !formData.isEmpty()) {
+            logger.info("Form data: {}", formData);
+        }
+        
+        if (jsonData != null && !jsonData.isEmpty()) {
+            logger.info("JSON data: {}", jsonData);
+        }
+        
+        // Extract credentials from either form data or JSON
+        String email = null;
+        String password = null;
+        
+        if (formData != null && !formData.isEmpty()) {
+            // Get email and password from form data
+            email = formData.get("email");
+            password = formData.get("password");
+            // NextAuth specific fields
+            String csrfToken = formData.get("csrfToken");
+            String callbackUrl = formData.get("callbackUrl");
+            String json = formData.get("json");
+            
+            logger.info("Form credentials - Email: {}, CSRF: {}, CallbackUrl: {}, JSON: {}", 
+                     email, csrfToken, callbackUrl, json);
+        } else if (jsonData != null && !jsonData.isEmpty()) {
+            // Get email and password from JSON data
+            email = (String) jsonData.get("email");
+            password = (String) jsonData.get("password");
+            logger.info("JSON credentials - Email: {}", email);
+        }
+        
+        // This is a dummy response for testing
+        // In a real application, you would validate credentials and return user data
         Map<String, Object> user = new HashMap<>();
         user.put("id", "1");
         user.put("name", "Test User");
-        user.put("email", "test@example.com");
+        user.put("email", email != null ? email : "test@example.com");
         
         return ResponseEntity.ok(user);
     }
