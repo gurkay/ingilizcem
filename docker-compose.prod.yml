@@ -70,8 +70,8 @@ services:
       - "3000:3000"
     environment:
       - BACKEND_API_URL=http://spring-backend:8080
-      - NEXT_PUBLIC_API_URL=https://ingilizcem.com
-      - NEXTAUTH_URL=https://ingilizcem.com
+      - NEXT_PUBLIC_API_URL=https://ingilizcem.net
+      - NEXTAUTH_URL=https://ingilizcem.net
       - NEXTAUTH_SECRET=NQOSd8J/wnueoxrzwc9BzoSfxvn5vvT9d+pGowghpUA=
     depends_on:
       - backend
@@ -107,7 +107,7 @@ services:
     volumes:
       - ./certbot/www:/var/www/certbot
       - /etc/letsencrypt:/etc/letsencrypt
-    command: certonly --webroot -w /var/www/certbot --force-renewal --email gurkay.basyigit@gmail.com -d ingilizcem.com -d www.ingilizcem.com --agree-tos
+    command: certonly --webroot -w /var/www/certbot --force-renewal --email gurkay.basyigit@gmail.com -d ingilizcem.net -d www.ingilizcem.net --agree-tos
 
 volumes:
   mysql_data:
