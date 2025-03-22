@@ -16,20 +16,21 @@ export default function SignInForm() {
     setIsLoading(true);
 
     try {
-      const callbackUrl = new URL('/dashboard', window.location.origin).toString();
       const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
-        callbackUrl,
+        callbackUrl: "/dashboard",
       });
+
+      console.log("Sign in result:", result);
 
       if (!result?.ok) {
         toast.error(result?.error || "Invalid credentials");
       } else {
         toast.success("Login successful");
         setTimeout(() => {
-          router.push(callbackUrl);
+          router.push("/dashboard");
           router.refresh();
         }, 1000);
       }

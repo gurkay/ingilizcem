@@ -36,6 +36,8 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials, req) {
         try {
           const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://ingilizcem.net';
+          console.log('Auth baseUrl:', baseUrl);
+          
           const res = await fetch(`${baseUrl}/api/auth/signin`, {
             method: 'POST',
             headers: {
@@ -50,20 +52,24 @@ export const authOptions: NextAuthOptions = {
           const data = await res.json();
           console.log('Auth response:', data);
 
-          if (res.ok && data.accessToken) {
-            return {
-              id: data.id.toString(),
-              email: data.email,
-              name: data.username,
-              accessToken: data.accessToken,
-              roles: data.roles,
-            };
+          if (!res.ok) {
+            throw new Error(data.message || 'Authentication failed');
           }
 
-          throw new Error(data.message || 'Authentication failed');
+          if (!data.accessToken) {
+            throw new Error('No access token received');
+          }
+
+          return {
+            id: data.id.toString(),
+            email: data.email,
+            name: data.username,
+            accessToken: data.accessToken,
+            roles: data.roles,
+          };
         } catch (error) {
           console.error('Auth error:', error);
-          throw error;
+          throw new Error(error instanceof Error ? error.message : 'Authentication failed');
         }
       },
     }),
