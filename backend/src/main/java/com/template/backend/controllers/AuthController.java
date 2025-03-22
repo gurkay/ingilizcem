@@ -62,7 +62,7 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
-    @GetMapping("/{email}")
+    @GetMapping("/user/{email}")
     public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
         try {
             User user = authService.getUserByEmail(email);
@@ -72,13 +72,5 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/_log")
-    public ResponseEntity<String> logUserAction() {
-        return ResponseEntity.ok("User action logged");
-    }
-
-    @GetMapping("/error")
-    public ResponseEntity<String> handleError() {
-        return ResponseEntity.ok("Error handled");
-    }
+    // NextAuth related endpoints have been moved to NextAuthController
 }

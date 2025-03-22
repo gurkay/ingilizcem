@@ -14,14 +14,13 @@ import java.util.Map;
  */
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
-@RequestMapping("/auth")
 public class NextAuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(NextAuthController.class);
 
-    @GetMapping("/providers")
+    @GetMapping({"/auth/providers", "/api/auth/providers"})
     public ResponseEntity<?> getProviders() {
-        logger.info("NextAuth: /auth/providers endpoint çağrıldı");
+        logger.info("NextAuth: /auth/providers veya /api/auth/providers endpoint çağrıldı");
         
         // NextAuth credentials provider configuration
         Map<String, Object> credentials = new HashMap<>();
@@ -37,9 +36,9 @@ public class NextAuthController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/error")
+    @GetMapping({"/auth/error", "/api/auth/error"})
     public ResponseEntity<?> getError() {
-        logger.info("NextAuth: /auth/error endpoint çağrıldı");
+        logger.info("NextAuth: /auth/error veya /api/auth/error endpoint çağrıldı");
         
         Map<String, Object> response = new HashMap<>();
         response.put("error", "Kimlik doğrulama hatası");
@@ -47,9 +46,9 @@ public class NextAuthController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/_log")
+    @PostMapping({"/auth/_log", "/api/auth/_log"})
     public ResponseEntity<?> postLog() {
-        logger.info("NextAuth: /auth/_log endpoint çağrıldı");
+        logger.info("NextAuth: /auth/_log veya /api/auth/_log endpoint çağrıldı");
         return ResponseEntity.ok().build();
     }
     
