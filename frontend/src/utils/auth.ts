@@ -35,7 +35,7 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         try {
-          const res = await fetch(`${process.env.BACKEND_API_URL}/api/auth/signin`, {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/signin`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -93,6 +93,7 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt',
   },
   secret: process.env.NEXTAUTH_SECRET,
+  debug: true,
 };
 
 export const getServerAuthSession = () => getServerSession(authOptions);

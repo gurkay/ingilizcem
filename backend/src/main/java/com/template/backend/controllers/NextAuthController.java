@@ -52,49 +52,26 @@ public class NextAuthController {
         return ResponseEntity.ok().build();
     }
     
-    @PostMapping(value = {"/auth/callback/credentials", "/api/auth/callback/credentials"}, 
-                consumes = {"application/x-www-form-urlencoded;charset=UTF-8", "application/json"})
-    public ResponseEntity<?> callbackCredentials(@RequestParam(required = false) Map<String, String> formData, 
-                                               @RequestBody(required = false) Map<String, Object> jsonData) {
+    @PostMapping(value = {"/auth/callback/credentials", "/api/auth/callback/credentials"})
+    public ResponseEntity<?> callbackCredentials(@RequestParam Map<String, String> formData) {
         logger.info("NextAuth: /auth/callback/credentials veya /api/auth/callback/credentials endpoint çağrıldı");
+        logger.info("Form data received: {}", formData);
         
-        // Log the request data for debugging
-        if (formData != null && !formData.isEmpty()) {
-            logger.info("Form data: {}", formData);
-        }
+        String email = formData.get("email");
+        String password = formData.get("password");
+        String csrfToken = formData.get("csrfToken");
+        String callbackUrl = formData.get("callbackUrl");
+        String json = formData.get("json");
         
-        if (jsonData != null && !jsonData.isEmpty()) {
-            logger.info("JSON data: {}", jsonData);
-        }
+        logger.info("Processing credentials - Email: {}, CSRF: {}, CallbackUrl: {}", email, csrfToken, callbackUrl);
         
-        // Extract credentials from either form data or JSON
-        String email = null;
-        String password = null;
-        
-        if (formData != null && !formData.isEmpty()) {
-            // Get email and password from form data
-            email = formData.get("email");
-            password = formData.get("password");
-            // NextAuth specific fields
-            String csrfToken = formData.get("csrfToken");
-            String callbackUrl = formData.get("callbackUrl");
-            String json = formData.get("json");
-            
-            logger.info("Form credentials - Email: {}, CSRF: {}, CallbackUrl: {}, JSON: {}", 
-                     email, csrfToken, callbackUrl, json);
-        } else if (jsonData != null && !jsonData.isEmpty()) {
-            // Get email and password from JSON data
-            email = (String) jsonData.get("email");
-            password = (String) jsonData.get("password");
-            logger.info("JSON credentials - Email: {}", email);
-        }
-        
-        // This is a dummy response for testing
-        // In a real application, you would validate credentials and return user data
+        // Return a user object that matches NextAuth's expected format
         Map<String, Object> user = new HashMap<>();
         user.put("id", "1");
         user.put("name", "Test User");
-        user.put("email", email != null ? email : "test@example.com");
+        user.put("email", email);
+        user.put("accessToken", "dummy-token");
+        user.put("roles", new String[]{"USER"});
         
         return ResponseEntity.ok(user);
     }
