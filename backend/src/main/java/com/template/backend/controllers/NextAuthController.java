@@ -5,8 +5,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.template.backend.payload.request.LoginRequest;
+import com.template.backend.payload.response.JwtResponse;
+import com.template.backend.security.services.UserDetailsImpl;
+import com.template.backend.service.AuthService;
+
+import jakarta.validation.Valid;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * NextAuth.js'in ihtiyaç duyduğu endpoint'leri sağlar
@@ -17,9 +26,14 @@ import java.util.Map;
 public class NextAuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(NextAuthController.class);
+    private final AuthService authService;
+
+    public NextAuthController(AuthService authService) {
+        this.authService = authService;
+    }
 
     @GetMapping({"/auth/providers", "/api/auth/providers"})
-    public ResponseEntity<?> getProviders() {
+    public ResponseEntity<?> getProviders(@Valid @RequestBody LoginRequest loginRequest) {
         logger.info("NextAuth: /auth/providers veya /api/auth/providers endpoint çağrıldı");
         
         // NextAuth credentials provider configuration
@@ -33,7 +47,21 @@ public class NextAuthController {
         response.put("credentials", credentials);
         
         logger.info("Returning NextAuth providers: {}", response);
-        return ResponseEntity.ok(response);
+        // return ResponseEntity.ok(response);
+
+        logger.info("NextAuth:::authenticateUser: " + loginRequest.getEmail() + " " + loginRequest.getPassword());
+        String jwt = authService.authenticate(loginRequest);
+        logger.info("NextAuth:::authenticateUser:::jwt:" + jwt);
+        UserDetailsImpl userDetails = (UserDetailsImpl) authService.getUserDetails(loginRequest.getEmail());
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(item -> item.getAuthority())
+                .collect(Collectors.toList());
+        logger.info("NextAuth:::authenticateUser:::roles:" + roles);
+        return ResponseEntity.ok(new JwtResponse(jwt,
+                userDetails.getId(),
+                userDetails.getUsername(),
+                userDetails.getEmail(),
+                roles));
     }
 
     @GetMapping({"/auth/error", "/api/auth/error"})
