@@ -33,7 +33,7 @@ public class NextAuthController {
     }
 
     @GetMapping({"/auth/providers", "/api/auth/providers"})
-    public ResponseEntity<?> getProviders(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> getProviders() {
         logger.info("NextAuth: /auth/providers veya /api/auth/providers endpoint çağrıldı");
         
         // NextAuth credentials provider configuration
