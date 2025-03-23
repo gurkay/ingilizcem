@@ -107,13 +107,15 @@ public class NextAuthController {
         user.put("accessToken", jwtResponse.getAccessToken());
         user.put("roles", jwtResponse.getRoles());
 
+        logger.info("NextAuth:::authenticateUser:::user:" + user);
+
         return ResponseEntity.ok(user);
     }
 
     @GetMapping({ "/auth/csrf", "/api/auth/csrf" })
     public ResponseEntity<?> getCsrf() {
         logger.info("NextAuth: /auth/csrf veya /api/auth/csrf endpoint çağrıldı");
-
+        logger.info("NextAuth:::getCsrf:::jwtResponse:" + jwtResponse);
         // NextAuth expects a CSRF token
         Map<String, Object> response = new HashMap<>();
         

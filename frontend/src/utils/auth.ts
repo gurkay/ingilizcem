@@ -39,8 +39,11 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          // Fixed URL to avoid construction issues
-          const baseUrl = "https://ingilizcem.net";          
+          // API URL'yi env değişkeninden alıp doğru şekilde oluştur
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://ingilizcem.net';
+          // URL'nin sonundaki slash varsa kaldır
+          const baseUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+          
           console.log('Auth baseUrl:', baseUrl);
           
           const res = await fetch(`${baseUrl}/api/auth/signin`, {
@@ -94,9 +97,9 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
-    // Simple redirect function with no URL construction
-    async redirect({ url, baseUrl }) {
-      // Always redirect to dashboard for simplicity
+    // Güvenli URL yönlendirme - URL oluşturma hatalarını önlemek için
+    async redirect() {
+      // Doğrudan sabit URL döndür - URL oluşturma veya işleme yapma
       return "/dashboard";
     }
   },

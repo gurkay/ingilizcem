@@ -16,47 +16,53 @@ export default function SignInForm() {
     setIsLoading(true);
 
     if (!email || !password) {
-      toast.error("Email and password are required");
+      toast.error("Email ve şifre gereklidir");
       setIsLoading(false);
       return;
     }
 
     try {
-      console.log('Attempting sign in with:', { email });
+      console.log('Giriş denemesi:', { email });
       
-      // Most basic auth call possible
+      // nextauth'a en basit şekilde çağrıda bulunuyoruz, URL oluşturma hatalarını önlemek için
       const result = await signIn("credentials", {
         email,
         password,
-        redirect: false,
+        redirect: false, // Otomatik yönlendirmeyi kapattık
       });
 
-      console.log("Sign in result:", result);
+      console.log("Giriş sonucu:", result);
 
       if (!result?.ok) {
-        const errorMessage = result?.error || "Invalid credentials";
-        console.error('Sign in failed:', errorMessage);
+        const errorMessage = result?.error || "Geçersiz kimlik bilgileri";
+        console.error('Giriş başarısız:', errorMessage);
         toast.error(errorMessage);
         setIsLoading(false);
         return;
       }
 
-      toast.success("Login successful");
+      toast.success("Giriş başarılı");
       
-      // Hardcoded redirect
+      // Basit yönlendirme - router.push yerine window.location.href kullanarak URL sorunlarını önlüyoruz
       setTimeout(() => {
-        window.location.href = "/dashboard";
-      }, 1000);
+        try {
+          router.push("/dashboard");
+        } catch (e) {
+          console.error("Router yönlendirme hatası:", e);
+          // Fallback yönlendirme
+          window.location.href = "/dashboard";
+        }
+      }, 1500);
     } catch (error) {
-      console.error('Sign in error:', error);
-      toast.error("An error occurred during sign in");
+      console.error('Giriş hatası:', error);
+      toast.error("Giriş sırasında bir hata oluştu");
       setIsLoading(false);
     }
   }
 
   return (
     <div className="container mx-auto max-w-md p-6 bg-white rounded-lg shadow-md">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Sign In</h1>
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">Giriş Yap</h1>
       <form onSubmit={handleSubmit}>
         <div className="space-y-4">
           <div>
@@ -71,7 +77,7 @@ export default function SignInForm() {
               type="email"
               name="email"
               id="email"
-              placeholder="Enter your email"
+              placeholder="Email adresinizi girin"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -82,14 +88,14 @@ export default function SignInForm() {
               className="block text-gray-700 text-sm font-bold mb-2"
               htmlFor="password"
             >
-              Password
+              Şifre
             </label>
             <input
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
               type="password"
               name="password"
               id="password"
-              placeholder="Enter your password"
+              placeholder="Şifrenizi girin"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -104,10 +110,10 @@ export default function SignInForm() {
           {isLoading ? (
             <div className="flex items-center justify-center">
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-              Signing in...
+              Giriş yapılıyor...
             </div>
           ) : (
-            "Sign In"
+            "Giriş Yap"
           )}
         </button>
       </form>
