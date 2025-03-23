@@ -39,18 +39,8 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          // Ensure we have a valid API URL - fallback to a hard-coded value if needed
-          let baseUrl = process.env.NEXT_PUBLIC_API_URL;
-          if (!baseUrl) {
-            console.error('NEXT_PUBLIC_API_URL is not defined, using fallback');
-            baseUrl = 'https://ingilizcem.net';
-          }
-          
-          // Remove trailing slash if present
-          if (baseUrl.endsWith('/')) {
-            baseUrl = baseUrl.slice(0, -1);
-          }
-          
+          // Fixed URL to avoid construction issues
+          const baseUrl = "https://ingilizcem.net";          
           console.log('Auth baseUrl:', baseUrl);
           
           const res = await fetch(`${baseUrl}/api/auth/signin`, {
@@ -71,11 +61,6 @@ export const authOptions: NextAuthOptions = {
             const errorMessage = data.message || `HTTP error! status: ${res.status}`;
             console.error('Auth failed:', errorMessage);
             throw new Error(errorMessage);
-          }
-
-          if (!data.accessToken) {
-            console.error('No access token in response:', data);
-            throw new Error('No access token received');
           }
 
           return {
@@ -109,25 +94,10 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
+    // Simple redirect function with no URL construction
     async redirect({ url, baseUrl }) {
-      // Handle redirects safely to prevent URL construction errors
-      try {
-        // If the URL is relative, prepend the base URL
-        if (url.startsWith('/')) {
-          return `${baseUrl}${url}`;
-        }
-        
-        // Check if the URL is from the same origin
-        if (url.startsWith(baseUrl)) {
-          return url;
-        }
-        
-        // Default to dashboard if there's any issue
-        return `${baseUrl}/dashboard`;
-      } catch (error) {
-        console.error('Redirect error:', error);
-        return `${baseUrl}/dashboard`;
-      }
+      // Always redirect to dashboard for simplicity
+      return "/dashboard";
     }
   },
   pages: {
@@ -138,8 +108,8 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  secret: process.env.NEXTAUTH_SECRET || 'NQOSd8J/wnueoxrzwc9BzoSfxvn5vvT9d+pGowghpUA=',
-  debug: process.env.NODE_ENV !== 'production',
-};
+  secret: process.env.NEXTAUTH_SECRET,
+  debug: true, // Enable debugging to see more info
+}
 
 export const getServerAuthSession = () => getServerSession(authOptions);

@@ -24,6 +24,7 @@ export default function SignInForm() {
     try {
       console.log('Attempting sign in with:', { email });
       
+      // Most basic auth call possible
       const result = await signIn("credentials", {
         email,
         password,
@@ -42,14 +43,13 @@ export default function SignInForm() {
 
       toast.success("Login successful");
       
-      // Wait for the toast to be visible before redirecting
+      // Hardcoded redirect
       setTimeout(() => {
-        router.push("/dashboard");
-        router.refresh();
+        window.location.href = "/dashboard";
       }, 1000);
     } catch (error) {
       console.error('Sign in error:', error);
-      toast.error(error instanceof Error ? error.message : "An error occurred during sign in");
+      toast.error("An error occurred during sign in");
       setIsLoading(false);
     }
   }
