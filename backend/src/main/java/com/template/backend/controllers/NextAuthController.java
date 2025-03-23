@@ -31,6 +31,7 @@ public class NextAuthController {
 
     public NextAuthController(AuthService authService) {
         this.authService = authService;
+        this.jwtResponse = new JwtResponse(); // JwtResponse nesnesini başlat
     }
 
     @GetMapping({ "/auth/providers", "/api/auth/providers" })
@@ -91,6 +92,7 @@ public class NextAuthController {
                 .map(item -> item.getAuthority())
                 .collect(Collectors.toList());
         logger.info("NextAuth:::authenticateUser:::roles:" + roles);
+
         jwtResponse.setAccessToken(jwt);
         jwtResponse.setId(userDetails.getId());
         jwtResponse.setUsername(userDetails.getUsername());
@@ -114,7 +116,13 @@ public class NextAuthController {
 
         // NextAuth expects a CSRF token
         Map<String, Object> response = new HashMap<>();
-        response.put("csrfToken", jwtResponse.getAccessToken());
+        
+        // Güvenli null kontrolü
+        String token = (jwtResponse != null && jwtResponse.getAccessToken() != null) 
+            ? jwtResponse.getAccessToken() 
+            : "csrf-token-placeholder";
+            
+        response.put("csrfToken", token);
 
         return ResponseEntity.ok(response);
     }
