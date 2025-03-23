@@ -29,9 +29,8 @@ public class NextAuthController {
     private final AuthService authService;
     private JwtResponse jwtResponse;
 
-    public NextAuthController(AuthService authService, JwtResponse jwtResponse) {
+    public NextAuthController(AuthService authService) {
         this.authService = authService;
-        this.jwtResponse = jwtResponse;
     }
 
     @GetMapping({ "/auth/providers", "/api/auth/providers" })
