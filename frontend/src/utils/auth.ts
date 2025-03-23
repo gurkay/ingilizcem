@@ -25,6 +25,12 @@ declare module "next-auth" {
   }
 }
 
+// Basit URL oluşturma - API URL'yi doğrudan döndür, yol eklemeye çalışma
+function getApiUrl(): string {
+  // Sabit URL döndür, karmaşık URL işlemlerinden kaçın
+  return process.env.NEXT_PUBLIC_API_URL || 'https://ingilizcem.net';
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -35,18 +41,20 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials, req) {
         if (!credentials?.email || !credentials?.password) {
-          console.error('Auth yetkilendirme hatası: Email veya şifre boş');
+          console.error('[Auth] Email veya şifre boş');
           throw new Error('Email ve şifre gereklidir');
         }
 
         try {
-          // API URL'yi sabit olarak tanımla
-          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://ingilizcem.net';
-          const apiUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+          // Basit sabit URL kullan
+          const apiUrl = getApiUrl();
+          console.log('[Auth] API URL:', apiUrl);
           
-          console.log('Auth URL:', `${apiUrl}/api/auth/signin`);
+          // Tam URL oluşturmadan sabit URL kullan
+          const signinUrl = apiUrl + '/api/auth/signin';
+          console.log('[Auth] Giriş URL:', signinUrl);
           
-          const res = await fetch(`${apiUrl}/api/auth/signin`, {
+          const res = await fetch(signinUrl, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -58,48 +66,37 @@ export const authOptions: NextAuthOptions = {
           });
 
           if (!res.ok) {
-            const statusCode = res.status;
-            let errorMessage;
-            
-            try {
-              const data = await res.json();
-              errorMessage = data.message || `HTTP hatası! Durum kodu: ${statusCode}`;
-            } catch (e) {
-              errorMessage = `HTTP hatası! Durum kodu: ${statusCode}`;
-            }
-            
-            console.error('Auth yanıt hatası:', errorMessage, statusCode);
-            throw new Error(errorMessage);
+            const errorMsg = `Giriş başarısız: HTTP ${res.status}`;
+            console.error('[Auth] Hata:', errorMsg);
+            throw new Error(errorMsg);
           }
 
           const data = await res.json();
-          console.log('Auth başarılı yanıt:', JSON.stringify(data));
-
+          
           if (!data.accessToken) {
-            console.error('Auth hatası: JWT token bulunamadı');
-            throw new Error('Kimlik doğrulama sunucusu geçerli bir token döndürmedi');
+            console.error('[Auth] Token bulunamadı');
+            throw new Error('Kimlik doğrulama başarısız oldu');
           }
 
-          // User nesnesini döndür
+          // Basit kullanıcı nesnesi döndür
           return {
-            id: data.id?.toString() || '0',
-            email: data.email || credentials.email,
-            name: data.username || data.name || credentials.email,
+            id: String(data.id || '0'),
+            email: data.email,
+            name: data.email,
             accessToken: data.accessToken,
-            roles: Array.isArray(data.roles) ? data.roles : [],
+            roles: data.roles || [],
           };
         } catch (error) {
-          console.error('Auth istisna:', error);
-          throw new Error(error instanceof Error ? error.message : 'Kimlik doğrulama başarısız');
+          console.error('[Auth] Hata:', error);
+          throw new Error('Giriş başarısız oldu');
         }
       },
     }),
   ],
   callbacks: {
     async jwt({ token, user }) {
-      // İlk girişte kullanıcı verilerini JWT'ye ekle
       if (user) {
-        console.log('JWT callback: User nesnesi alındı');
+        console.log('[Auth] JWT oluşturuluyor');
         token.id = user.id;
         token.accessToken = user.accessToken;
         token.roles = user.roles;
@@ -107,18 +104,17 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      // JWT'den session'a veri aktarımı
       if (token) {
-        console.log('Session callback: JWT verisi session\'a ekleniyor');
-        session.user.id = token.id as string | undefined;
-        session.user.accessToken = token.accessToken as string | undefined;
-        session.user.roles = token.roles as string[] | undefined;
+        console.log('[Auth] Oturum oluşturuluyor');
+        session.user.id = token.id as string;
+        session.user.accessToken = token.accessToken as string;
+        session.user.roles = token.roles as string[];
       }
       return session;
     },
     async redirect() {
-      // Sabit yönlendirme - tüm yönlendirmeleri dashboard'a yap
-      return "/dashboard";
+      // Basit, sabit bir URL döndür - her zaman dashboard
+      return '/dashboard';
     }
   },
   pages: {
@@ -129,7 +125,7 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 gün
   },
-  secret: process.env.NEXTAUTH_SECRET || 'my-very-secret-key-for-next-auth',
+  secret: process.env.NEXTAUTH_SECRET || 'my-secret-key-for-next-auth',
   debug: process.env.NODE_ENV !== 'production',
 }
 
