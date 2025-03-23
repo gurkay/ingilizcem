@@ -22,40 +22,61 @@ export default function SignInForm() {
     }
 
     try {
-      console.log('Giriş denemesi:', { email });
+      console.log('Giriş denemesi başlatılıyor:', { email, timestamp: new Date().toISOString() });
       
-      // nextauth'a en basit şekilde çağrıda bulunuyoruz, URL oluşturma hatalarını önlemek için
+      // NextAuth'a daha basit bir çağrı, redirect'i kapatarak ve hata durumlarını yakalayarak
       const result = await signIn("credentials", {
         email,
         password,
-        redirect: false, // Otomatik yönlendirmeyi kapattık
+        redirect: false, // Otomatik yönlendirme kapalı
       });
 
-      console.log("Giriş sonucu:", result);
+      console.log("Giriş sonucu (tam):", JSON.stringify(result));
 
-      if (!result?.ok) {
-        const errorMessage = result?.error || "Geçersiz kimlik bilgileri";
-        console.error('Giriş başarısız:', errorMessage);
-        toast.error(errorMessage);
+      if (!result) {
+        console.error('Giriş başarısız: NextAuth yanıt döndürmedi');
+        toast.error("Giriş işlemi sırasında bir hata oluştu: Sunucu yanıt vermedi");
         setIsLoading(false);
         return;
       }
 
-      toast.success("Giriş başarılı");
+      if (result.error) {
+        console.error('Giriş başarısız:', result.error);
+        toast.error(result.error || "Geçersiz kimlik bilgileri");
+        setIsLoading(false);
+        return;
+      }
+
+      if (!result.ok) {
+        console.error('Giriş başarısız: HTTP hata kodu', result.status);
+        toast.error("Giriş sırasında bir hata oluştu (HTTP " + result.status + ")");
+        setIsLoading(false);
+        return;
+      }
+
+      // Başarılı giriş
+      console.log('Giriş başarılı:', { status: result.status, url: result.url });
+      toast.success("Giriş başarılı! Yönlendiriliyorsunuz...");
       
-      // Basit yönlendirme - router.push yerine window.location.href kullanarak URL sorunlarını önlüyoruz
+      // Basit yönlendirme stratejisi
       setTimeout(() => {
         try {
+          // İlk olarak router ile yönlendirmeyi dene
           router.push("/dashboard");
         } catch (e) {
           console.error("Router yönlendirme hatası:", e);
-          // Fallback yönlendirme
-          window.location.href = "/dashboard";
+          try {
+            // Router başarısız olursa doğrudan window.location ile yönlendir
+            window.location.href = "/dashboard";
+          } catch (navError) {
+            console.error("Yönlendirme tamamen başarısız:", navError);
+            toast.error("Yönlendirme başarısız oldu, lütfen manuel olarak dashboard'a gidin");
+          }
         }
       }, 1500);
     } catch (error) {
-      console.error('Giriş hatası:', error);
-      toast.error("Giriş sırasında bir hata oluştu");
+      console.error('Giriş işlemi sırasında hata:', error);
+      toast.error("Giriş sırasında beklenmeyen bir hata oluştu");
       setIsLoading(false);
     }
   }
