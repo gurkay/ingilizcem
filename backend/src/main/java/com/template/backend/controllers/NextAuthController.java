@@ -47,21 +47,9 @@ public class NextAuthController {
         response.put("credentials", credentials);
         
         logger.info("Returning NextAuth providers: {}", response);
-        // return ResponseEntity.ok(response);
+        return ResponseEntity.ok(response);
 
-        logger.info("NextAuth:::authenticateUser: " + loginRequest.getEmail() + " " + loginRequest.getPassword());
-        String jwt = authService.authenticate(loginRequest);
-        logger.info("NextAuth:::authenticateUser:::jwt:" + jwt);
-        UserDetailsImpl userDetails = (UserDetailsImpl) authService.getUserDetails(loginRequest.getEmail());
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(item -> item.getAuthority())
-                .collect(Collectors.toList());
-        logger.info("NextAuth:::authenticateUser:::roles:" + roles);
-        return ResponseEntity.ok(new JwtResponse(jwt,
-                userDetails.getId(),
-                userDetails.getUsername(),
-                userDetails.getEmail(),
-                roles));
+
     }
 
     @GetMapping({"/auth/error", "/api/auth/error"})
@@ -101,7 +89,21 @@ public class NextAuthController {
         user.put("accessToken", "dummy-token");
         user.put("roles", new String[]{"USER"});
         
-        return ResponseEntity.ok(user);
+        // return ResponseEntity.ok(user);
+
+        logger.info("NextAuth:::authenticateUser: " + email + " " + password);
+        String jwt = authService.authenticate(new LoginRequest(email, password));
+        logger.info("NextAuth:::authenticateUser:::jwt:" + jwt);
+        UserDetailsImpl userDetails = (UserDetailsImpl) authService.getUserDetails(email);
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(item -> item.getAuthority())
+                .collect(Collectors.toList());
+        logger.info("NextAuth:::authenticateUser:::roles:" + roles);
+        return ResponseEntity.ok(new JwtResponse(jwt,
+                userDetails.getId(),
+                userDetails.getUsername(),
+                userDetails.getEmail(),
+                roles));
     }
     
     @GetMapping({"/auth/csrf", "/api/auth/csrf"})
