@@ -25,10 +25,21 @@ declare module "next-auth" {
   }
 }
 
-// Basit URL oluşturma - API URL'yi doğrudan döndür, yol eklemeye çalışma
+// Docker ortamında doğru API URL'yi ayarla
 function getApiUrl(): string {
-  // Sabit URL döndür, karmaşık URL işlemlerinden kaçın
-  return process.env.NEXT_PUBLIC_API_URL || 'https://ingilizcem.net';
+  // Server-side kullanım için BACKEND_API_URL (container-to-container)
+  if (typeof window === 'undefined') {
+    const backendUrl = process.env.BACKEND_API_URL;
+    if (backendUrl) {
+      console.log('[Auth] Server-side API URL:', backendUrl);
+      return backendUrl;
+    }
+  }
+  
+  // Client-side kullanım için NEXT_PUBLIC_API_URL (browser-to-server)
+  const publicUrl = process.env.NEXT_PUBLIC_API_URL;
+  console.log('[Auth] Client-side API URL:', publicUrl);
+  return publicUrl || 'https://ingilizcem.net';
 }
 
 export const authOptions: NextAuthOptions = {
@@ -46,12 +57,10 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          // Basit sabit URL kullan
           const apiUrl = getApiUrl();
-          console.log('[Auth] API URL:', apiUrl);
+          console.log('[Auth] Kullanılan API URL:', apiUrl);
           
-          // Tam URL oluşturmadan sabit URL kullan
-          const signinUrl = apiUrl + '/api/auth/signin';
+          const signinUrl = `${apiUrl}/api/auth/signin`;
           console.log('[Auth] Giriş URL:', signinUrl);
           
           const res = await fetch(signinUrl, {
@@ -72,20 +81,24 @@ export const authOptions: NextAuthOptions = {
           }
 
           const data = await res.json();
+          console.log('[Auth] Backend yanıtı:', data);
           
           if (!data.accessToken) {
             console.error('[Auth] Token bulunamadı');
             throw new Error('Kimlik doğrulama başarısız oldu');
           }
 
-          // Basit kullanıcı nesnesi döndür
-          return {
+          // Kullanıcı nesnesini oluştur
+          const user = {
             id: String(data.id || '0'),
             email: data.email,
             name: data.email,
             accessToken: data.accessToken,
             roles: data.roles || [],
           };
+          
+          console.log('[Auth] Oluşturulan kullanıcı:', user);
+          return user;
         } catch (error) {
           console.error('[Auth] Hata:', error);
           throw new Error('Giriş başarısız oldu');
@@ -94,26 +107,63 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
+      console.log('[Auth] JWT Callback - Giriş:', { 
+        hasUser: !!user, 
+        hasAccount: !!account,
+        token: token ? 'mevcut' : 'yok'
+      });
+
       if (user) {
-        console.log('[Auth] JWT oluşturuluyor');
+        console.log('[Auth] JWT oluşturuluyor - Kullanıcı:', {
+          id: user.id,
+          email: user.email,
+          hasToken: !!user.accessToken,
+          roles: user.roles
+        });
+        
         token.id = user.id;
         token.accessToken = user.accessToken;
         token.roles = user.roles;
       }
+      
+      console.log('[Auth] JWT Callback - Çıkış:', {
+        hasToken: !!token,
+        hasAccessToken: !!token?.accessToken,
+        hasRoles: !!token?.roles
+      });
+      
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token, user }) {
+      console.log('[Auth] Session Callback - Giriş:', {
+        hasSession: !!session,
+        hasToken: !!token,
+        hasUser: !!user
+      });
+
       if (token) {
-        console.log('[Auth] Oturum oluşturuluyor');
+        console.log('[Auth] Session oluşturuluyor - Token:', {
+          id: token.id,
+          hasAccessToken: !!token.accessToken,
+          roles: token.roles
+        });
+
         session.user.id = token.id as string;
         session.user.accessToken = token.accessToken as string;
         session.user.roles = token.roles as string[];
       }
+
+      console.log('[Auth] Session Callback - Çıkış:', {
+        hasSession: !!session,
+        hasUser: !!session?.user,
+        hasAccessToken: !!session?.user?.accessToken
+      });
+
       return session;
     },
-    async redirect() {
-      // Basit, sabit bir URL döndür - her zaman dashboard
+    async redirect({ url, baseUrl }) {
+      console.log('[Auth] Redirect Callback:', { url, baseUrl });
       return '/dashboard';
     }
   },
@@ -124,9 +174,10 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 gün
+    updateAge: 24 * 60 * 60, // 24 saat
   },
-  secret: process.env.NEXTAUTH_SECRET || 'my-secret-key-for-next-auth',
-  debug: process.env.NODE_ENV !== 'production',
+  secret: process.env.NEXTAUTH_SECRET,
+  debug: true, // Debug modunu her zaman açık tut
 }
 
 export const getServerAuthSession = () => getServerSession(authOptions);

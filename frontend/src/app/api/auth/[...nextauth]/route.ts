@@ -1,29 +1,16 @@
 import NextAuth from "next-auth";
 import { authOptions } from "@/utils/auth";
 
-// Ortam değişkenlerini basitçe göster
+// Ortam değişkenlerini göster
 console.log('[NextAuth] Başlatılıyor');
-console.log('[NextAuth] API_URL:', process.env.NEXT_PUBLIC_API_URL || 'https://ingilizcem.net');
-
-// Handler'ı basit bir şekilde oluştur
-let handler;
-
-try {
-  // NextAuth handler'ı direk oluştur
-  handler = NextAuth(authOptions);
-  console.log('[NextAuth] Handler başarıyla oluşturuldu');
-} catch (error) {
-  console.error('[NextAuth] Handler oluşturma hatası:', error);
-  
-  // Hata durumunda basit bir yanıt ver
-  handler = () => new Response(
-    JSON.stringify({ 
-      error: 'Kimlik doğrulama hatası',
-      time: new Date().toISOString()
-    }),
-    { status: 500, headers: { 'Content-Type': 'application/json' } }
-  );
-}
+console.log('[NextAuth] Ortam değişkenleri:', {
+  PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+  BACKEND_API_URL: process.env.BACKEND_API_URL,
+  NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+  NODE_ENV: process.env.NODE_ENV
+});
+// NextAuth handler'ı oluştur
+const handler = NextAuth(authOptions);
 
 // Dışa aktar
 export { handler as GET, handler as POST };

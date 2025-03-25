@@ -1,8 +1,9 @@
 "use client";
+
+import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { ToastContainer, toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
 export default function SignInForm() {
@@ -22,49 +23,114 @@ export default function SignInForm() {
     }
 
     try {
-      console.log('Giriş denemeleri başlatılıyor:', { email });
+      console.log('SignInForm:::handleSubmit:::email:', email);
+      console.log('SignInForm:::handleSubmit:::password:', password);
       
-      // NextAuth.js'i en basit şekilde çağırıyoruz - tüm opsiyonel parametreleri kaldırdık
-      // callbackUrl, redirect parametreleri URL hatalarına sebep olduğu için kullanmıyoruz
       const result = await signIn("credentials", {
         email,
         password,
-        redirect: false, // URL oluşturma hatalarını önlemek için otomatik yönlendirme kapalı
+        redirect: true,
+        redirectTo: "/dashboard"
       });
 
-      console.log("Giriş sonucu:", result);
+      console.log('SignInForm:::handleSubmit:::result:', result);
 
-      if (!result) {
-        toast.error("Giriş işlemi sırasında bir hata oluştu");
-        setIsLoading(false);
-        return;
+      if (!result?.ok) {
+        console.error('SignInForm:::handleSubmit:::error:', result?.error);
+        toast.error(result?.error || "Giriş başarısız oldu");
+      } else {
+        console.log('SignInForm:::handleSubmit:::success:', result);
+        toast.success("Giriş başarılı!");
+        
+        // Session'ın oluşması için kısa bir bekleme
+        setTimeout(() => {
+          router.push("/dashboard");
+          router.refresh();
+        }, 1000);
       }
-
-      if (result.error) {
-        toast.error(result.error || "Giriş bilgileri hatalı");
-        setIsLoading(false);
-        return;
-      }
-
-      // Başarılı giriş
-      toast.success("Giriş başarılı!");
-      
-      // Basit yönlendirme stratejisi, 1.5 saniye bekleyip yönlendirme yap
-      setTimeout(() => {
-        try {
-          // window.location kullanarak URL hatalarından kaçınıyoruz
-          window.location.href = "/dashboard";
-        } catch (e) {
-          console.error("Yönlendirme hatası:", e);
-          toast.error("Yönlendirme başarısız oldu, lütfen manuel olarak dashboard'a gidin");
-        }
-      }, 1500);
     } catch (error) {
-      console.error('Giriş hatası:', error);
+      console.error('SignInForm:::handleSubmit:::error:', error);
       toast.error("Giriş sırasında bir hata oluştu");
+    } finally {
       setIsLoading(false);
     }
   }
+
+  // async function handleSubmit(event: React.FormEvent) {
+  //   event.preventDefault();
+  //   setIsLoading(true);
+
+  //   if (!email || !password) {
+  //     toast.error("Email ve şifre gereklidir");
+  //     setIsLoading(false);
+  //     return;
+  //   }
+
+  //   try {
+  //     console.log('Manuel giriş denemesi başlatılıyor:', { email });
+      
+  //     // NextAuth kullanmadan doğrudan backend API'sine istek yap
+  //     const response = await fetch('/api/auth/manual-signin', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ email, password }),
+  //     });
+
+  //     const result = await response.json();
+  //     console.log('Giriş sonucu:', result);
+
+  //     if (!response.ok) {
+  //       toast.error(result.error || "Giriş başarısız oldu");
+  //       setIsLoading(false);
+  //       return;
+  //     }
+
+  //     // Başarılı giriş
+  //     toast.success("Giriş başarılı!");
+      
+  //     // Tarayıcı local storage'a token ve kullanıcı bilgilerini kaydet
+  //     if (result.accessToken) {
+  //       // Tüm kullanıcı bilgilerini localStorage'a kaydet
+  //       localStorage.setItem('token', result.accessToken);
+  //       localStorage.setItem('user', JSON.stringify({
+  //         id: result.id,
+  //         email: result.email,
+  //         name: result.name,
+  //         roles: result.roles
+  //       }));
+        
+  //       console.log('Token ve kullanıcı bilgileri kaydedildi:', {
+  //         token: result.accessToken.substring(0, 20) + '...',
+  //         user: result.email
+  //       });
+  //     }
+      
+  //     // Basit yönlendirme, 1 saniye bekle
+  //     setTimeout(() => {
+  //       try {
+  //         console.log("Dashboard'a yönlendiriliyor...");
+  //         // Önce window.location.href ile yönlendir
+  //         router.push("/dashboard");
+  //         // window.location.href = "/dashboard";
+  //       } catch (e) {
+  //         console.error("window.location hatası:", e);
+  //         try {
+  //           // Alternatif olarak router'ı dene
+  //           router.push("/dashboard");
+  //         } catch (routerError) {
+  //           console.error("router.push hatası:", routerError);
+  //           toast.error("Yönlendirme başarısız oldu");
+  //         }
+  //       }
+  //     }, 3000);
+  //   } catch (error) {
+  //     console.error('Giriş hatası:', error);
+  //     toast.error("Bağlantı hatası oluştu");
+  //     setIsLoading(false);
+  //   }
+  // }
 
   return (
     <div className="container mx-auto max-w-md p-6 bg-white rounded-lg shadow-md">
