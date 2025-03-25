@@ -26,7 +26,7 @@ declare module "next-auth" {
 }
 
 // Docker ortamında doğru API URL'yi ayarla
-function getApiUrl(): string {
+export function getApiUrl(): string {
   // Server-side kullanım için BACKEND_API_URL (container-to-container)
   if (typeof window === 'undefined') {
     const backendUrl = process.env.BACKEND_API_URL;
