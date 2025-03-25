@@ -35,7 +35,7 @@ public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
-    @PostMapping("/providers")
+    @GetMapping("/providers")
     public ResponseEntity<JwtResponse> providers(@Valid @RequestBody LoginRequest loginRequest) {
         logger.info("providers");
         String jwt = authService.authenticate(loginRequest);
