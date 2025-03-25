@@ -35,6 +35,24 @@ public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
+    @PostMapping("/providers")
+    public ResponseEntity<JwtResponse> providers(@Valid @RequestBody LoginRequest loginRequest) {
+        logger.info("providers");
+        String jwt = authService.authenticate(loginRequest);
+        logger.info("providers:::jwt:::" + jwt);
+        System.out.println("providers:::jwt:::" + jwt);
+        UserDetailsImpl userDetails = (UserDetailsImpl) authService.getUserDetails(loginRequest.getEmail());
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(item -> item.getAuthority())
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(new JwtResponse(jwt,
+                userDetails.getId(),
+                userDetails.getUsername(),
+                userDetails.getEmail(),
+                roles));
+    }
+
     @PostMapping("/signin")
     public ResponseEntity<JwtResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         logger.info("authenticateUser");

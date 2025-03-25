@@ -9,7 +9,7 @@ export async function apiAuthSignUp(credentials: {
   try {
     console.log(`backendSignUp:::${FRONTEND_API}/api/auth/signup`);
     console.log("credentials", credentials);
-    const response = await fetch(`${FRONTEND_API}/api/auth/signup`, {
+    const response = await fetch(`${process.env.BACKEND_API_URL}/api/auth/signup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -36,5 +36,5 @@ export async function apiAuthSignUp(credentials: {
   }
 
 }
-export const BAPI = process.env.BACKEND_API as string;
+export const BAPI = process.env.BACKEND_API_URL as string;
 export const Token = process.env.BEARER as string;
