@@ -38,7 +38,7 @@ public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
-    @GetMapping({ "/auth/providers", "/api/auth/providers" })
+    @GetMapping("/providers")
     public ResponseEntity<?> getProviders() {
         logger.info("NextAuth: /auth/providers veya /api/auth/providers endpoint çağrıldı");
 
@@ -57,7 +57,7 @@ public class AuthController {
 
     }
 
-    @GetMapping({ "/auth/error", "/api/auth/error" })
+    @GetMapping("/error")
     public ResponseEntity<?> getError() {
         logger.info("NextAuth: /auth/error veya /api/auth/error endpoint çağrıldı");
 
@@ -67,13 +67,13 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping({ "/auth/_log", "/api/auth/_log" })
+    @PostMapping("/_log")
     public ResponseEntity<?> postLog() {
         logger.info("NextAuth: /auth/_log veya /api/auth/_log endpoint çağrıldı");
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping(value = { "/auth/callback/credentials", "/api/auth/callback/credentials" })
+    @PostMapping("/callback/credentials")
     public ResponseEntity<?> callbackCredentials(@RequestParam Map<String, String> formData) {
         logger.info("NextAuth: /auth/callback/credentials veya /api/auth/callback/credentials endpoint çağrıldı");
         logger.info("Form data received: {}", formData);
@@ -116,7 +116,7 @@ public class AuthController {
         return ResponseEntity.ok(user);
     }
 
-    @GetMapping({ "/auth/csrf", "/api/auth/csrf" })
+    @GetMapping("/csrf")
     public ResponseEntity<?> getCsrf() {
         logger.info("NextAuth: /auth/csrf veya /api/auth/csrf endpoint çağrıldı");
         logger.info("NextAuth:::getCsrf:::jwtResponse:" + jwtResponse);
