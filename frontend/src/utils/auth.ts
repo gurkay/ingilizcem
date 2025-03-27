@@ -26,7 +26,7 @@ declare module "next-auth" {
 }
 
 // Docker ortamında doğru API URL'yi ayarla
-export function getApiUrl(): string {
+function getApiUrl(): string {
   // Server-side kullanım için BACKEND_API_URL (container-to-container)
   if (typeof window === 'undefined') {
     const backendUrl = process.env.BACKEND_API_URL;
@@ -107,77 +107,58 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user, account }) {
-      console.log('[Auth] JWT Callback - Giriş:', { 
-        hasUser: !!user, 
-        hasAccount: !!account,
-        token: token ? 'mevcut' : 'yok'
-      });
-
+    async jwt({ token, user }) {
+      // User objesi sadece ilk giriş yapıldığında mevcut olur
       if (user) {
-        console.log('[Auth] JWT oluşturuluyor - Kullanıcı:', {
-          id: user.id,
-          email: user.email,
-          hasToken: !!user.accessToken,
-          roles: user.roles
+        console.log('[Auth] JWT - Yeni giriş:', {
+          user: {
+            id: user.id,
+            email: user.email,
+            hasAccessToken: !!user.accessToken
+          }
         });
         
         token.id = user.id;
         token.accessToken = user.accessToken;
         token.roles = user.roles;
+      } else {
+        console.log('[Auth] JWT - Mevcut token:', {
+          id: token.id,
+          email: token.email,
+          hasAccessToken: !!token.accessToken
+        });
       }
-      
-      console.log('[Auth] JWT Callback - Çıkış:', {
-        hasToken: !!token,
-        hasAccessToken: !!token?.accessToken,
-        hasRoles: !!token?.roles
-      });
       
       return token;
     },
-    async session({ session, token, user }) {
-      console.log('[Auth] Session Callback - Giriş:', {
-        hasSession: !!session,
-        hasToken: !!token,
-        hasUser: !!user
+    async session({ session, token }) {
+      // Önemli: Bu callback her session oluşturulduğunda çağrılır
+      console.log('[Auth] Session oluşturuluyor:', {
+        session: !!session,
+        token: !!token
       });
 
-      if (token) {
-        console.log('[Auth] Session oluşturuluyor - Token:', {
-          id: token.id,
-          hasAccessToken: !!token.accessToken,
-          roles: token.roles
-        });
+      // Token'dan session'a veri aktarımı
+      session.user.id = token.id as string;
+      session.user.accessToken = token.accessToken as string;
+      session.user.roles = token.roles as string[];
 
-        session.user.id = token.id as string;
-        session.user.accessToken = token.accessToken as string;
-        session.user.roles = token.roles as string[];
-      }
-
-      console.log('[Auth] Session Callback - Çıkış:', {
-        hasSession: !!session,
-        hasUser: !!session?.user,
-        hasAccessToken: !!session?.user?.accessToken
+      console.log('[Auth] Session oluşturuldu:', {
+        userId: session.user.id,
+        hasAccessToken: !!session.user.accessToken
       });
 
       return session;
     },
-    async redirect({ url, baseUrl }) {
-      console.log('[Auth] Redirect Callback:', { url, baseUrl });
-      return '/dashboard';
-    }
   },
   pages: {
     signIn: '/auth/signin',
-    error: '/auth/error',
   },
   session: {
-    strategy: 'jwt',
+    strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 gün
-    updateAge: 24 * 60 * 60, // 24 saat
   },
-  secret: process.env.NEXTAUTH_SECRET,
-  debug: true, // Debug modunu her zaman açık tut
+  debug: true,
 }
 
 export const getServerAuthSession = () => getServerSession(authOptions);

@@ -24,7 +24,6 @@ export default function SignInForm() {
 
     try {
       console.log('SignInForm:::handleSubmit:::email:', email);
-      console.log('SignInForm:::handleSubmit:::password:', password);
       
       const result = await signIn("credentials", {
         email,

@@ -1,6 +1,5 @@
 import axios from "axios";
 import { BACKEND_API, FRONTEND_API } from "./constants";
-import { getApiUrl } from "./auth";
 
 export async function apiAuthSignUp(credentials: {
   email: string;
