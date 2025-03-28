@@ -23,113 +23,100 @@ export default function SignInForm() {
     }
 
     try {
-      console.log('SignInForm:::handleSubmit:::email:', email);
+      console.log(`Giriş denemesi (${new Date().toISOString()}):`, { email });
       
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: true,
-        redirectTo: "/dashboard"
+      // Önce NextAuth.js ile deneyelim
+      let result;
+      try {
+        result = await signIn("credentials", {
+          email,
+          password,
+          redirect: false,
+        });
+        
+        console.log('NextAuth sonucu:', result);
+        
+        if (result?.ok) {
+          toast.success("NextAuth ile giriş başarılı!");
+          redirectToDashboard();
+          return;
+        }
+      } catch (nextAuthError) {
+        console.error('NextAuth hatası:', nextAuthError);
+        // NextAuth hatası durumunda manuel yönteme devam et
+      }
+
+      // NextAuth başarısız olursa, manuel olarak backend API'yle iletişim kuralım
+      console.log('Manuel giriş deneniyor...');
+      
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://ingilizcem.net';
+      const response = await fetch(`${apiUrl}/api/auth/signin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
       });
 
-      console.log('SignInForm:::handleSubmit:::result:', result);
-
-      if (!result?.ok) {
-        console.error('SignInForm:::handleSubmit:::error:', result?.error);
-        toast.error(result?.error || "Giriş başarısız oldu");
-      } else {
-        console.log('SignInForm:::handleSubmit:::success:', result);
-        toast.success("Giriş başarılı!");
-        
-        // Session'ın oluşması için kısa bir bekleme
-        setTimeout(() => {
-          router.push("/dashboard");
-          router.refresh();
-        }, 1000);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Manuel giriş başarısız:', response.status, errorText);
+        toast.error(`Giriş başarısız: ${response.status} ${response.statusText}`);
+        setIsLoading(false);
+        return;
       }
+
+      const data = await response.json();
+      console.log('Manuel giriş başarılı:', data);
+      
+      if (!data.accessToken) {
+        console.error('Token bulunamadı!');
+        toast.error("Kimlik doğrulama başarısız: Token bulunamadı");
+        setIsLoading(false);
+        return;
+      }
+      
+      // Tarayıcı local storage'a token ve kullanıcı bilgilerini kaydet
+      localStorage.setItem('token', data.accessToken);
+      localStorage.setItem('user', JSON.stringify({
+        id: data.id,
+        email: data.email,
+        name: data.username || data.email,
+        roles: data.roles
+      }));
+      
+      console.log('Token ve kullanıcı bilgileri kaydedildi');
+      
+      toast.success("Manuel giriş başarılı!");
+      redirectToDashboard();
     } catch (error) {
-      console.error('SignInForm:::handleSubmit:::error:', error);
-      toast.error("Giriş sırasında bir hata oluştu");
-    } finally {
+      console.error('Giriş sırasında bir hata oluştu:', error);
+      toast.error("Bağlantı hatası: Giriş sırasında bir sorun oluştu");
       setIsLoading(false);
     }
   }
-
-  // async function handleSubmit(event: React.FormEvent) {
-  //   event.preventDefault();
-  //   setIsLoading(true);
-
-  //   if (!email || !password) {
-  //     toast.error("Email ve şifre gereklidir");
-  //     setIsLoading(false);
-  //     return;
-  //   }
-
-  //   try {
-  //     console.log('Manuel giriş denemesi başlatılıyor:', { email });
-      
-  //     // NextAuth kullanmadan doğrudan backend API'sine istek yap
-  //     const response = await fetch('/api/auth/manual-signin', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({ email, password }),
-  //     });
-
-  //     const result = await response.json();
-  //     console.log('Giriş sonucu:', result);
-
-  //     if (!response.ok) {
-  //       toast.error(result.error || "Giriş başarısız oldu");
-  //       setIsLoading(false);
-  //       return;
-  //     }
-
-  //     // Başarılı giriş
-  //     toast.success("Giriş başarılı!");
-      
-  //     // Tarayıcı local storage'a token ve kullanıcı bilgilerini kaydet
-  //     if (result.accessToken) {
-  //       // Tüm kullanıcı bilgilerini localStorage'a kaydet
-  //       localStorage.setItem('token', result.accessToken);
-  //       localStorage.setItem('user', JSON.stringify({
-  //         id: result.id,
-  //         email: result.email,
-  //         name: result.name,
-  //         roles: result.roles
-  //       }));
-        
-  //       console.log('Token ve kullanıcı bilgileri kaydedildi:', {
-  //         token: result.accessToken.substring(0, 20) + '...',
-  //         user: result.email
-  //       });
-  //     }
-      
-  //     // Basit yönlendirme, 1 saniye bekle
-  //     setTimeout(() => {
-  //       try {
-  //         console.log("Dashboard'a yönlendiriliyor...");
-  //         // Önce window.location.href ile yönlendir
-  //         router.push("/dashboard");
-  //         // window.location.href = "/dashboard";
-  //       } catch (e) {
-  //         console.error("window.location hatası:", e);
-  //         try {
-  //           // Alternatif olarak router'ı dene
-  //           router.push("/dashboard");
-  //         } catch (routerError) {
-  //           console.error("router.push hatası:", routerError);
-  //           toast.error("Yönlendirme başarısız oldu");
-  //         }
-  //       }
-  //     }, 3000);
-  //   } catch (error) {
-  //     console.error('Giriş hatası:', error);
-  //     toast.error("Bağlantı hatası oluştu");
-  //     setIsLoading(false);
-  //   }
-  // }
+  
+  function redirectToDashboard() {
+    console.log("Dashboard'a yönlendiriliyor...");
+    
+    // 2 saniye bekle ve yönlendir (toast'u görmek için)
+    setTimeout(() => {
+      try {
+        // Önce window.location ile dene
+        window.location.href = "/dashboard";
+      } catch (e) {
+        console.error("window.location hatası:", e);
+        try {
+          // Alternatif olarak router'ı dene
+          router.push("/dashboard");
+          router.refresh();
+        } catch (routerError) {
+          console.error("router.push hatası:", routerError);
+          toast.error("Yönlendirme başarısız");
+        }
+      }
+    }, 2000);
+  }
 
   return (
     <div className="container mx-auto max-w-md p-6 bg-white rounded-lg shadow-md">

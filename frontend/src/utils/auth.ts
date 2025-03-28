@@ -57,9 +57,25 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          const apiUrl = getApiUrl();
+          // Docker ortamında doğru URL'yi kullan
+          let apiUrl;
+          if (typeof window === 'undefined') {
+            // Server-side rendering durumunda
+            apiUrl = process.env.BACKEND_API_URL;
+            console.log('[Auth] Server-side giriş URL yapısı kullanılıyor');
+          } else {
+            // Client-side rendering durumunda
+            apiUrl = process.env.NEXT_PUBLIC_API_URL;
+            console.log('[Auth] Client-side giriş URL yapısı kullanılıyor');
+          }
+          
+          if (!apiUrl) {
+            apiUrl = 'https://ingilizcem.net';
+          }
+          
           console.log('[Auth] Kullanılan API URL:', apiUrl);
           
+          // Direk olarak signin endpoint'ine istek yap
           const signinUrl = `${apiUrl}/api/auth/signin`;
           console.log('[Auth] Giriş URL:', signinUrl);
           
