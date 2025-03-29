@@ -9,18 +9,18 @@ const callSignOut = async () => {
 };
 
 
-export function SignOutButton(){
-  return(
+export function SignOutButton() {
+  return (
     <button onClick={callSignOut} className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded">
-    Sign out
-  </button>
+      Sign out
+    </button>
   )
 }
 
-export function DashboardButton(){
-  return(
+export function DashboardButton() {
+  return (
     <Link href="/dashboard" className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">
-    Dashboard
-  </Link>
+      Dashboard
+    </Link>
   )
 }
