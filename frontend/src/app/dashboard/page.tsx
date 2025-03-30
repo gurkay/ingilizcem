@@ -1,8 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+
+// NextAuth hook'unu dinamik olarak import et
+let useSession: () => {
+  data: any | null;
+  status: "loading" | "authenticated" | "unauthenticated";
+};
+
+try {
+  // @ts-ignore
+  useSession = require("next-auth/react").useSession;
+} catch (error) {
+  console.warn("NextAuth/react useSession yüklenemedi:", error);
+  useSession = () => ({ data: null, status: "unauthenticated" });
+}
 
 interface User {
   id?: string;
@@ -11,17 +24,68 @@ interface User {
   roles?: string[];
 }
 
+interface Session {
+  user?: {
+    id?: string;
+    email?: string | null;
+    name?: string | null;
+    roles?: string[];
+    accessToken?: string;
+  };
+}
+
 export default function Dashboard() {
-  const { data: session, status } = useSession();
+  // useSession hook'unu try-catch içinde kullan 
+  let sessionData: { data: Session | null; status: string } = { data: null, status: "loading" };
+  try {
+    sessionData = useSession();
+  } catch (error) {
+    console.error("useSession hatası:", error);
+    sessionData = { data: null, status: "unauthenticated" };
+  }
+
+  const { data: session, status } = sessionData;
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
     console.log("Dashboard sayfası yükleniyor...");
-    console.log("NextAuth session durumu:", status);
     
-    // 1. Önce NextAuth session'ı kontrol et
+    // Öncelikle localStorage'dan kullanıcı bilgilerini kontrol et
+    const checkLocalAuth = () => {
+      try {
+        const storedToken = localStorage.getItem('token');
+        const storedUserStr = localStorage.getItem('user');
+        
+        console.log("Yerel depolama kontrol ediliyor...");
+        
+        if (storedToken && storedUserStr) {
+          try {
+            const storedUser = JSON.parse(storedUserStr);
+            console.log("Yerel depolamada kullanıcı bulundu:", storedUser);
+            setUser(storedUser);
+            setLoading(false);
+            return true;
+          } catch (e) {
+            console.error("Kullanıcı bilgisi ayrıştırılamadı:", e);
+          }
+        }
+        return false;
+      } catch (error) {
+        console.error("Yerel depolama kontrolünde hata:", error);
+        return false;
+      }
+    };
+
+    // 1. Önce localStorage kontrol et
+    if (typeof window !== 'undefined') {
+      const localAuthExists = checkLocalAuth();
+      if (localAuthExists) return;
+    }
+    
+    // 2. NextAuth session'ı varsa kullan
+    console.log("NextAuth session durumu:", status);
     if (status === "authenticated" && session?.user) {
       console.log("NextAuth ile oturum açıldı:", session.user);
       setUser({
@@ -32,37 +96,18 @@ export default function Dashboard() {
       });
       setLoading(false);
       return;
-    }
-    
-    // 2. NextAuth session yoksa localStorage'a bak
-    const checkLocalAuth = () => {
-      const storedToken = localStorage.getItem('token');
-      const storedUserStr = localStorage.getItem('user');
-      
-      console.log("Yerel depolama kontrol ediliyor...");
-      
-      if (storedToken && storedUserStr) {
-        try {
-          const storedUser = JSON.parse(storedUserStr);
-          console.log("Yerel depolamada kullanıcı bulundu:", storedUser);
-          setUser(storedUser);
-        } catch (e) {
-          console.error("Kullanıcı bilgisi ayrıştırılamadı:", e);
-          redirectToLogin();
-        }
-      } else {
-        console.log("Yerel depolamada oturum bilgisi bulunamadı");
+    } else if (status !== "loading") {
+      // Eğer localStorage'da token yoksa ve NextAuth session'ı da yoksa, giriş sayfasına yönlendir
+      if (typeof window !== 'undefined' && !checkLocalAuth()) {
+        console.log("Oturum bulunamadı, giriş sayfasına yönlendiriliyor");
         redirectToLogin();
       }
-      
-      setLoading(false);
-    };
-    
-    // 3. Yalnızca client tarafında localStorage'a eriş
-    if (typeof window !== 'undefined' && status === "unauthenticated") {
-      checkLocalAuth();
     }
-  }, [session, status, router]);
+    
+    if (status !== "loading") {
+      setLoading(false);
+    }
+  }, [session, status]);
   
   const redirectToLogin = () => {
     console.log("Giriş sayfasına yönlendiriliyor...");

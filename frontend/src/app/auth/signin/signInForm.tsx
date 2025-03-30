@@ -102,8 +102,13 @@ export default function SignInForm() {
     // 2 saniye bekle ve yönlendir (toast'u görmek için)
     setTimeout(() => {
       try {
-        // Önce window.location ile dene
-        window.location.href = "/dashboard";
+        console.log("window.location.href:::", window.location.href);
+        // Mutlak URL kullan
+        const baseUrl = window.location.origin;
+        const dashboardUrl = `${baseUrl}/dashboard`;
+        console.log("Yönlendirme URL'si:", dashboardUrl);
+        
+        window.location.href = dashboardUrl;
       } catch (e) {
         console.error("window.location hatası:", e);
         try {
