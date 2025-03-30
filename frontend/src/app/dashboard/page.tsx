@@ -3,19 +3,16 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-// NextAuth hook'unu dinamik olarak import et
-let useSession: () => {
+// Başlangıçta doğrudan TypeScript tiplerini tanımla - dinamik import yapmak yerine
+interface SessionStatus {
   data: any | null;
   status: "loading" | "authenticated" | "unauthenticated";
-};
-
-try {
-  // @ts-ignore
-  useSession = require("next-auth/react").useSession;
-} catch (error) {
-  console.warn("NextAuth/react useSession yüklenemedi:", error);
-  useSession = () => ({ data: null, status: "unauthenticated" });
 }
+
+// NextAuth'u devre dışı bırak - manuel oturum kontrolünü kullan
+const useManualAuth = (): SessionStatus => {
+  return { data: null, status: "unauthenticated" };
+};
 
 interface User {
   id?: string;
@@ -24,27 +21,7 @@ interface User {
   roles?: string[];
 }
 
-interface Session {
-  user?: {
-    id?: string;
-    email?: string | null;
-    name?: string | null;
-    roles?: string[];
-    accessToken?: string;
-  };
-}
-
 export default function Dashboard() {
-  // useSession hook'unu try-catch içinde kullan 
-  let sessionData: { data: Session | null; status: string } = { data: null, status: "loading" };
-  try {
-    sessionData = useSession();
-  } catch (error) {
-    console.error("useSession hatası:", error);
-    sessionData = { data: null, status: "unauthenticated" };
-  }
-
-  const { data: session, status } = sessionData;
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -52,7 +29,7 @@ export default function Dashboard() {
   useEffect(() => {
     console.log("Dashboard sayfası yükleniyor...");
     
-    // Öncelikle localStorage'dan kullanıcı bilgilerini kontrol et
+    // Sadece localStorage kontrolü yap
     const checkLocalAuth = () => {
       try {
         const storedToken = localStorage.getItem('token');
@@ -78,40 +55,40 @@ export default function Dashboard() {
       }
     };
 
-    // 1. Önce localStorage kontrol et
     if (typeof window !== 'undefined') {
+      // URL'den yönlendirme kontrolü
+      const url = new URL(window.location.href);
+      const callbackUrl = url.searchParams.get('callbackUrl');
+      
+      console.log("URL parametreleri kontrol ediliyor, callbackUrl:", callbackUrl);
+      
+      // Yerel depolamadaki kimlik bilgilerini kontrol et
       const localAuthExists = checkLocalAuth();
-      if (localAuthExists) return;
-    }
-    
-    // 2. NextAuth session'ı varsa kullan
-    console.log("NextAuth session durumu:", status);
-    if (status === "authenticated" && session?.user) {
-      console.log("NextAuth ile oturum açıldı:", session.user);
-      setUser({
-        id: session.user.id,
-        email: session.user.email || undefined,
-        name: session.user.name || undefined,
-        roles: session.user.roles
-      });
-      setLoading(false);
-      return;
-    } else if (status !== "loading") {
-      // Eğer localStorage'da token yoksa ve NextAuth session'ı da yoksa, giriş sayfasına yönlendir
-      if (typeof window !== 'undefined' && !checkLocalAuth()) {
+      
+      if (!localAuthExists) {
         console.log("Oturum bulunamadı, giriş sayfasına yönlendiriliyor");
-        redirectToLogin();
+        
+        // Eğer yönlendirme döngüsünde değilsek giriş sayfasına yönlendir
+        if (!url.pathname.includes('/auth/signin')) {
+          redirectToLogin();
+        }
       }
     }
     
-    if (status !== "loading") {
-      setLoading(false);
-    }
-  }, [session, status]);
+    setLoading(false);
+  }, []);
   
   const redirectToLogin = () => {
     console.log("Giriş sayfasına yönlendiriliyor...");
-    router.push('/auth/signin');
+    
+    if (typeof window !== 'undefined') {
+      // Url parametresi ekleyerek döngü kontrolü yap
+      const currentUrl = encodeURIComponent(window.location.href);
+      const loginUrl = `/auth/signin?from=dashboard&url=${currentUrl}`;
+      window.location.href = loginUrl;
+    } else {
+      router.push('/auth/signin');
+    }
   };
 
   if (loading) {

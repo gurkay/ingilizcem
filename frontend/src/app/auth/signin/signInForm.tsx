@@ -25,31 +25,10 @@ export default function SignInForm() {
     try {
       console.log(`Giriş denemesi (${new Date().toISOString()}):`, { email });
       
-      // Önce NextAuth.js ile deneyelim
-      let result;
-      try {
-        result = await signIn("credentials", {
-          email,
-          password,
-          redirect: false,
-        });
-        
-        console.log('NextAuth sonucu:', result);
-        
-        if (result?.ok) {
-          toast.success("NextAuth ile giriş başarılı!");
-          redirectToDashboard();
-          return;
-        }
-      } catch (nextAuthError) {
-        console.error('NextAuth hatası:', nextAuthError);
-        // NextAuth hatası durumunda manuel yönteme devam et
-      }
-
-      // NextAuth başarısız olursa, manuel olarak backend API'yle iletişim kuralım
-      console.log('Manuel giriş deneniyor...');
+      // NextAuth kullanmadan doğrudan backend'e bağlan
+      console.log('Backend API ile doğrudan giriş yapılıyor...');
       
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://ingilizcem.net';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || window.location.origin;
       const response = await fetch(`${apiUrl}/api/auth/signin`, {
         method: 'POST',
         headers: {
@@ -60,14 +39,14 @@ export default function SignInForm() {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Manuel giriş başarısız:', response.status, errorText);
+        console.error('Giriş başarısız:', response.status, errorText);
         toast.error(`Giriş başarısız: ${response.status} ${response.statusText}`);
         setIsLoading(false);
         return;
       }
 
       const data = await response.json();
-      console.log('Manuel giriş başarılı:', data);
+      console.log('Giriş başarılı:', data);
       
       if (!data.accessToken) {
         console.error('Token bulunamadı!');
@@ -87,7 +66,7 @@ export default function SignInForm() {
       
       console.log('Token ve kullanıcı bilgileri kaydedildi');
       
-      toast.success("Manuel giriş başarılı!");
+      toast.success("Giriş başarılı!");
       redirectToDashboard();
     } catch (error) {
       console.error('Giriş sırasında bir hata oluştu:', error);
@@ -102,22 +81,38 @@ export default function SignInForm() {
     // 2 saniye bekle ve yönlendir (toast'u görmek için)
     setTimeout(() => {
       try {
-        console.log("window.location.href:::", window.location.href);
-        // Mutlak URL kullan
-        const baseUrl = window.location.origin;
-        const dashboardUrl = `${baseUrl}/dashboard`;
-        console.log("Yönlendirme URL'si:", dashboardUrl);
+        // URL parametrelerini kontrol et
+        const url = new URL(window.location.href);
+        const redirectUrl = url.searchParams.get('url');
+        const fromParam = url.searchParams.get('from');
         
+        console.log("URL bilgileri:", {
+          current: url.toString(),
+          redirectParam: redirectUrl,
+          fromParam: fromParam
+        });
+        
+        // Mutlak URL oluştur
+        const baseUrl = window.location.origin;
+        let dashboardUrl = `${baseUrl}/dashboard`;
+        
+        // Eğer başka bir sayfadan yönlendirildiyse ve güvenli bir URL ise ona dön
+        if (redirectUrl && redirectUrl.startsWith(baseUrl)) {
+          console.log("Orijinal URL'ye yönlendiriliyor:", redirectUrl);
+          dashboardUrl = redirectUrl;
+        }
+        
+        console.log("Yönlendirme URL'si:", dashboardUrl);
         window.location.href = dashboardUrl;
       } catch (e) {
-        console.error("window.location hatası:", e);
+        console.error("Yönlendirme hatası:", e);
+        
+        // Basit fallback - sadece dashboard'a git
         try {
-          // Alternatif olarak router'ı dene
-          router.push("/dashboard");
-          router.refresh();
-        } catch (routerError) {
-          console.error("router.push hatası:", routerError);
-          toast.error("Yönlendirme başarısız");
+          window.location.href = "/dashboard";
+        } catch (fallbackError) {
+          console.error("Fallback yönlendirme hatası:", fallbackError);
+          toast.error("Yönlendirme başarısız oldu, lütfen manuel olarak Dashboard sayfasına gidin");
         }
       }
     }, 2000);
