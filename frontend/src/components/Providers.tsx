@@ -2,13 +2,10 @@
 
 import { store } from "@/app/lib/features/store";
 import { Provider } from "react-redux";
-import { SessionProvider } from "next-auth/react";
 
 function Providers({children}: {children: React.ReactNode}) {
-    return(
-        <SessionProvider>
-            <Provider store={store}>{children}</Provider>
-        </SessionProvider>
+    return (
+        <Provider store={store}>{children}</Provider>
     );
 }
 
