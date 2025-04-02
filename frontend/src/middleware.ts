@@ -4,6 +4,8 @@ import type { NextFetchEvent, NextRequest } from "next/server";
 
 export function middleware(req: NextRequest, event: NextFetchEvent) {
   try {
+    console.log("middleware çalıştı");
+    console.log("req.cookies", req.cookies);
     const token = req.cookies.get("next-auth.session-token");
     console.log("token", token);
     if (!token?.value) {
