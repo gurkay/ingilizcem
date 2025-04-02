@@ -11,7 +11,12 @@ export function middleware(req: NextRequest, event: NextFetchEvent) {
     console.log("token", token);
     console.log("token2", token2);
 
-    if (!token?.value) {
+    // if (!token?.value) {
+    //   // Authentication failed
+    //   return NextResponse.redirect(new URL("/auth/signin", req.url)); // Redirect to 
+    // }
+
+    if (!token2?.value) {
       // Authentication failed
       return NextResponse.redirect(new URL("/auth/signin", req.url)); // Redirect to 
     }
