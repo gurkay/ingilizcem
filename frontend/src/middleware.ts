@@ -6,18 +6,14 @@ export function middleware(req: NextRequest, event: NextFetchEvent) {
   try {
     console.log("middleware çalıştı");
     console.log("req.cookies", req.cookies);
-    const token = req.cookies.get("next-auth.session-token");
-    const token2 = req.cookies.get("__Secure-next-auth.session-token");
+    const token = req.cookies.get("next-auth.session-token") === undefined 
+                  ? req.cookies.get("__Secure-next-auth.session-token")
+                  : req.cookies.get("next-auth.session-token");
+
     console.log("token", token);
-    console.log("token2", token2);
 
-    // if (!token?.value) {
-    //   // Authentication failed
-    //   return NextResponse.redirect(new URL("/auth/signin", req.url)); // Redirect to 
-    // }
-
-    if (!token2?.value) {
-      // Authentication failed
+    // Authentication failed
+    if (!token?.value) {
       return NextResponse.redirect(new URL("/auth/signin", req.url)); // Redirect to 
     }
 
