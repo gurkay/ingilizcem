@@ -17,9 +17,10 @@ class HttpService {
             const session = await getSession();
             console.log('HttpService:::session:::', session);
             const token = session?.user?.accessToken;
+            const tokenLocalStorage = localStorage.getItem('token');
             
-            if (token) {
-                config.headers['Authorization'] = `Bearer ${token}`;
+            if (token || tokenLocalStorage) {
+                config.headers['Authorization'] = `Bearer ${token || tokenLocalStorage}`;
             }
             return config;
         }, (error) => {
