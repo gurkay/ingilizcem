@@ -30,8 +30,8 @@ function LearningPage() {
         if(e.target.name === 'clozeTest') {
             const prompt = PromptConstants.getClozeTest(content);
             console.log('LearningPage:::prompt:::', prompt);
-            dispatch(getPrompt(prompt));
-            //dispatch(googleAi(prompt));
+            //dispatch(getPrompt(prompt));
+            dispatch(googleAi(prompt));
             route.push(`/dashboard/learning/clozeTest`);
         } else if(e.target.name === 'wordSynonyms') {
             const prompt = PromptConstants.getWordSynonyms(content);

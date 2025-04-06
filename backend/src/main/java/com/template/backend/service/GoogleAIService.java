@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
@@ -20,9 +21,9 @@ public class GoogleAIService {
     @Value("${gemini.api-key}")
     private String apiKey;
 
-    private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+    private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=";
 
-    public String askQuestion(String question) throws IOException {
+    public String askQuestion(String prompt) throws IOException {
         try {
             RestTemplate restTemplate = new RestTemplate();
             
@@ -30,52 +31,30 @@ public class GoogleAIService {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             
-            // Create request body
-            Map<String, Object> requestBody = new HashMap<>();
-            
-            List<Map<String, Object>> contents = new ArrayList<>();
-            Map<String, Object> content = new HashMap<>();
-            Map<String, Object> requestPart = new HashMap<>();
-            
-            requestPart.put("text", question);
-            content.put("parts", List.of(requestPart));
-            contents.add(content);
-            
-            requestBody.put("contents", contents);
-            
-            // Add generation parameters
-            Map<String, Object> generationConfig = new HashMap<>();
-            generationConfig.put("temperature", 0.8);
-            generationConfig.put("maxOutputTokens", 200);
-            generationConfig.put("topP", 0.9);
-            requestBody.put("generationConfig", generationConfig);
-            
-            // Create HttpEntity with headers and body
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-            
-            // Append API key as query parameter
-            String url = GEMINI_API_URL + "?key=" + apiKey;
-            // Make the API call
-            ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
-            Map<String, Object> responseBody = response.getBody();
-            
-            // Extract text from response (nested structure might vary based on API docs)
-            if (responseBody != null) {
-                List<Map<String, Object>> candidates = (List<Map<String, Object>>) responseBody.get("candidates");
-                if (candidates != null && !candidates.isEmpty()) {
-                    Map<String, Object> candidate = candidates.get(0);
-                    List<Map<String, Object>> candidateContents = (List<Map<String, Object>>) candidate.get("content");
-                    if (candidateContents != null && !candidateContents.isEmpty()) {
-                        Map<String, Object> candidateContent = candidateContents.get(0);
-                        List<Map<String, Object>> responseParts = (List<Map<String, Object>>) candidateContent.get("parts");
-                        if (responseParts != null && !responseParts.isEmpty()) {
-                            return (String) responseParts.get(0).get("text");
-                        }
-                    }
+            Map<String, Object> content = Map.of("parts", List.of(Map.of("text", prompt)));
+            Map<String, Object> request = Map.of("contents", List.of(content));
+    
+            headers.setContentType(MediaType.APPLICATION_JSON);
+    
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
+            String url = GEMINI_API_URL + apiKey;
+            try {
+                ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
+    
+                // JSON response parsing
+                Map<String, Object> responseBody = response.getBody();
+                if (responseBody != null && responseBody.containsKey("candidates")) {
+                    Map firstCandidate = ((List<Map>) responseBody.get("candidates")).get(0);
+                    Map contentMap = (Map) firstCandidate.get("content");
+                    List<Map> parts = (List<Map>) contentMap.get("parts");
+                    return (String) parts.get(0).get("text");
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
+                return "Hata oluştu: " + e.getMessage();
             }
-            
-            return "Cevap bulunamadı.";
+    
+            return "Yanıt alınamadı.";
             
         } catch (Exception e) {
             throw new IOException("Gemini API yanıtı işlenirken bir hata oluştu: " + e.getMessage(), e);
