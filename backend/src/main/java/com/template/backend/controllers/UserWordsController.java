@@ -19,7 +19,7 @@ import com.template.backend.entities.UserWords;
 import com.template.backend.service.UserWordsService;
 
 @RestController
-@RequestMapping("/api/user-words")
+@RequestMapping({"/api/user-words", "/user-words"})
 public class UserWordsController {
 
     @Autowired
