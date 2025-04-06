@@ -63,6 +63,7 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
             .requestMatchers("/api/auth/**", "/auth/callback/credentials", "/auth/error", "/auth/_log", "/api/auth/callback/credentials").permitAll()
             .requestMatchers("/auth/**").permitAll()
             .requestMatchers("/error").permitAll()
+            .requestMatchers("/api/auth/profile").hasAnyRole("USER", "ADMIN", "MANAGER")
             .requestMatchers("/api/lessons/findByLessonId/**", "/lessons/findByLessonId/**").hasAnyRole("USER", "ADMIN", "MANAGER")
             .requestMatchers("/api/lessons/findByUserId/**").hasAnyRole("USER", "ADMIN", "MANAGER")
             .requestMatchers("/api/lessons/updateWordStatus/**").hasAnyRole("USER", "ADMIN", "MANAGER")

@@ -37,11 +37,8 @@ export default function SignInForm() {
       toast.success("Authentication successful. Fetching profile...");
 
       try {
-        const profileResponse = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/auth/profile`,
-          { withCredentials: true }
-        );
-
+        const profileResponse = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/auth/signin`, { email, password } );
         console.log("SignInForm: Received profile data:", profileResponse);
 
         if (profileResponse.status === 200 && profileResponse.data?.accessToken) {

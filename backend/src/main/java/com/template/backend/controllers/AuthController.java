@@ -56,6 +56,12 @@ public class AuthController {
                 roles));
     }
 
+    @GetMapping("/profile")
+    public ResponseEntity<User> getProfile() {
+        logger.info("profile:::getProfile:::");
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
         authService.validateSignupRequest(signUpRequest);
