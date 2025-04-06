@@ -1,4 +1,5 @@
 "use client";
+import axios from "axios";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -14,7 +15,7 @@ export default function SignInForm() {
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setIsLoading(true);
-
+    console.log("SignInForm: Attempting login...");
     try {
       const result = await signIn("credentials", {
         email,
@@ -36,6 +37,50 @@ export default function SignInForm() {
       toast.error("An error occurred during sign in");
     } finally {
       setIsLoading(false);
+    }
+    
+    try {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/signin`,
+        { email, password },
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+
+      console.log("SignInForm: Received response from backend:", response);
+
+      if (response.status === 200 && response.data?.accessToken) {
+        toast.success("Login successful");
+        console.log("SignInForm: Login successful, preparing to save data.");
+
+        const { accessToken, ...userData } = response.data;
+        console.log("SignInForm: Extracted Token:", accessToken ? 'Token Found' : 'Token NOT Found');
+        console.log("SignInForm: Extracted User Data:", userData);
+
+        localStorage.setItem('token', accessToken);
+        localStorage.setItem('user', JSON.stringify(userData));
+        console.log("SignInForm: Data saved to localStorage.");
+
+        const savedToken = localStorage.getItem('token');
+        const savedUser = localStorage.getItem('user');
+        console.log("SignInForm: Verified localStorage - Token:", savedToken ? 'Exists' : 'MISSING');
+        console.log("SignInForm: Verified localStorage - User:", savedUser ? 'Exists' : 'MISSING');
+
+        window.dispatchEvent(new Event('storage'));
+        console.log("SignInForm: Dispatched storage event.");
+
+        console.log("SignInForm: Redirecting to /dashboard via window.location.href...");
+        window.location.href = '/dashboard';
+
+      } else {
+        console.error("SignInForm: Login failed - Backend response:", response.data);
+        toast.error(response.data?.message || "Invalid credentials");
+      }
+    } catch (error: any) {
+      console.error('SignInForm: Login request error:', error.response || error.message);
+      toast.error(error.response?.data?.message || "An error occurred during sign in");
+    } finally {
+      setIsLoading(false);
+      console.log("SignInForm: Login attempt finished.");
     }
   }
 
@@ -96,8 +141,8 @@ export default function SignInForm() {
           )}
         </button>
       </form>
-      <ToastContainer 
-        position="top-right" 
+      <ToastContainer
+        position="top-right"
         autoClose={2000}
         hideProgressBar={false}
         closeOnClick

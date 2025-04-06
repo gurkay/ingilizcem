@@ -4,7 +4,7 @@ export default async function Dashboard() {
   console.log("Dashboard page");
   const session = await getServerAuthSession();
 
-  const token = localStorage.setItem('token', session?.user?.accessToken || '');
+  //const token = localStorage.setItem('token', session?.user?.accessToken || '');
   console.log("Session:", session);
   // Add error handling for failed authentication
 

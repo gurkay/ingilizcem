@@ -1,49 +1,108 @@
+"use client"; // Make it a Client Component
+
 import Link from "next/link";
 import Image from "next/image";
-import { getServerAuthSession } from "@/utils/auth";
+import { useEffect, useState } from "react"; // Import hooks
+import { useRouter } from "next/navigation"; // Import useRouter for redirection
 
-export default async function DashboardLayout({
+interface User {
+  id?: string;
+  email?: string;
+  name?: string;
+  image?: string;
+  roles?: string[];
+}
+
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getServerAuthSession();
-  const user = session?.user;
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-  if (!session) {
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const storedUserStr = localStorage.getItem('user');
+    let parsedUser: User | null = null;
+
+    if (storedUserStr) {
+      try {
+        parsedUser = JSON.parse(storedUserStr);
+      } catch (e) {
+        console.error("Failed to parse user from localStorage", e);
+        localStorage.removeItem('token'); // Clear invalid data
+        localStorage.removeItem('user');
+      }
+    }
+
+    if (!token || !parsedUser) {
+      console.log("No auth data found in localStorage, redirecting to signin.");
+      router.push('/auth/signin'); // Redirect if no token or user
+    } else {
+      setUser(parsedUser);
+      setLoading(false);
+    }
+
+    // Add listener for storage changes (e.g., sign out)
+    const handleStorageChange = () => {
+      const currentToken = localStorage.getItem('token');
+      if (!currentToken) {
+        console.log("Token removed from storage, redirecting to signin.");
+        setUser(null);
+        router.push('/auth/signin');
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Cleanup listener on component unmount
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+
+  }, [router]); // Add router to dependency array
+
+  if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-        <h2 className="text-2xl font-bold mb-4">
-          Please log in to access the dashboard.
-        </h2>
-        <Link
-          href="/login"
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Log In
-        </Link>
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        <p className="ml-2">Loading Dashboard...</p>
       </div>
     );
   }
 
+  // If loading is finished and still no user (shouldn't happen if redirect works)
+  if (!user) {
+     return (
+       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+         <h2 className="text-2xl font-bold mb-4">
+           Redirecting to login...
+         </h2>
+       </div>
+     );
+  }
+
+  // Render the layout only if user is authenticated
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="flex">
         {/* Sidebar */}
         <aside className="fixed inset-y-0 left-0 bg-white w-64 shadow-lg transform transition-transform duration-300 ease-in-out z-30">
           <div className="flex flex-col h-full">
-            {/* User Profile Section */}
+            {/* User Profile Section - Use state 'user' */}
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center space-x-4">
                 <Image
-                  src={user?.image || "/images/default-user.png"}
-                  alt={`${user?.name}'s profile`}
+                  src={user?.image || "/images/default-user.png"} // Use state
+                  alt={`${user?.name || 'User'}'s profile`}
                   width={48}
                   height={48}
                   className="rounded-full"
                 />
                 <div>
-                  <h2 className="text-sm font-semibold text-gray-700">{user?.name}</h2>
+                  <h2 className="text-sm font-semibold text-gray-700">{user?.name || 'User'}</h2>
                   <p className="text-xs text-gray-500">{user?.email}</p>
                 </div>
               </div>
@@ -53,7 +112,7 @@ export default async function DashboardLayout({
             <nav className="flex-1 p-4">
               <ul className="space-y-2">
                 <li>
-                  <Link 
+                  <Link
                     href="/dashboard"
                     className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition-colors"
                   >
@@ -64,7 +123,7 @@ export default async function DashboardLayout({
                   </Link>
                 </li>
                 <li>
-                  <Link 
+                  <Link
                     href="/dashboard/lessons"
                     className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition-colors"
                   >
@@ -75,7 +134,7 @@ export default async function DashboardLayout({
                   </Link>
                 </li>
                 <li>
-                  <Link 
+                  <Link
                     href="/dashboard/learning"
                     className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition-colors"
                   >
