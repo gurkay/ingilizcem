@@ -20,7 +20,7 @@ public class GoogleAIService {
     @Value("${gemini.api-key}")
     private String apiKey;
 
-    private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
+    private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
     public String askQuestion(String question) throws IOException {
         try {
@@ -55,7 +55,6 @@ public class GoogleAIService {
             
             // Append API key as query parameter
             String url = GEMINI_API_URL + "?key=" + apiKey;
-            
             // Make the API call
             ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
             Map<String, Object> responseBody = response.getBody();

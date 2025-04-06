@@ -14,6 +14,12 @@ export const getPrompt: any = createAsyncThunk('getPrompt', async (prop: string)
   return Promise.resolve(response.data);
 });
 
+export const googleAi: any = createAsyncThunk('googleAi', async (prop: string) => {
+    const response = await GenerateTextService.googleAi(prop);
+    return response;
+  }
+);
+
 export const getTranslateFromEnglish: any = createAsyncThunk('getTranslateFromEnglish', async (prop: string) => {
   const response = await axios.post('/api/generate', {
     body: prop

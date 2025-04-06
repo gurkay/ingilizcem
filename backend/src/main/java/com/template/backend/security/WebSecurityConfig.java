@@ -65,6 +65,7 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
             .requestMatchers("/error").permitAll()
             .requestMatchers("/api/auth/profile").hasAnyRole("USER", "ADMIN", "MANAGER")
             .requestMatchers("/api/lessons/findByLessonId/**", "/lessons/findByLessonId/**").hasAnyRole("USER", "ADMIN", "MANAGER")
+            .requestMatchers("/api/googleAi/generate/**", "/googleAi/generate/**").hasAnyRole("USER", "ADMIN", "MANAGER")
             .requestMatchers("/api/lessons/findByUserId/**").hasAnyRole("USER", "ADMIN", "MANAGER")
             .requestMatchers("/api/lessons/updateWordStatus/**").hasAnyRole("USER", "ADMIN", "MANAGER")
             .requestMatchers("/api/user-words/findByUserIdAndStatus/**").hasAnyRole("USER", "ADMIN", "MANAGER")

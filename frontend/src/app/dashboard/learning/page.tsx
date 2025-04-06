@@ -3,7 +3,7 @@
 import MyLevelModal from "@/app/_components/modals/MyLevelModal";
 import QuizDropdown from "@/app/_components/QuizDropdown";
 import TableUserWords from "@/app/_components/userWords/TableUserWords";
-import { getPrompt } from "@/app/lib/features/generateText/generateTextCreateAsyncThunk";
+import { getPrompt, googleAi } from "@/app/lib/features/generateText/generateTextCreateAsyncThunk";
 import { AppDispatch, RootState } from "@/app/lib/features/store";
 import { PromptConstants } from "@/constants/PromptConstants";
 import { IUserWordsDto } from "@/interfaces/IPaginationParams";
@@ -31,21 +31,25 @@ function LearningPage() {
             const prompt = PromptConstants.getClozeTest(content);
             console.log('LearningPage:::prompt:::', prompt);
             dispatch(getPrompt(prompt));
+            //dispatch(googleAi(prompt));
             route.push(`/dashboard/learning/clozeTest`);
         } else if(e.target.name === 'wordSynonyms') {
             const prompt = PromptConstants.getWordSynonyms(content);
             console.log('LearningPage:::prompt:::', prompt);
-            dispatch(getPrompt(prompt));
+            // dispatch(getPrompt(prompt));
+            dispatch(googleAi(prompt));
             route.push(`/dashboard/learning/wordSynonyms`);
         } else if(e.target.name === 'turkishMean') {
             const prompt = PromptConstants.getTurkishMean(content);
             console.log('LearningPage:::prompt:::', prompt);
-            dispatch(getPrompt(prompt));
+            // dispatch(getPrompt(prompt));
+            dispatch(googleAi(prompt));
             route.push(`/dashboard/learning/turkishMean`);
         } else if(e.target.name === 'englishMean') {
             const prompt = PromptConstants.getEnglishMean(content);
             console.log('LearningPage:::prompt:::', prompt);
-            dispatch(getPrompt(prompt));
+            // dispatch(getPrompt(prompt));
+            dispatch(googleAi(prompt));
             route.push(`/dashboard/learning/englishMean`);
         } else if(e.target.name === 'story') {
             handleShow();
@@ -69,7 +73,8 @@ function LearningPage() {
 
         const prompt = PromptConstants.getStory(content);
         console.log('LearningPage:::prompt:::', prompt);
-        dispatch(getPrompt(prompt));
+        // dispatch(getPrompt(prompt));
+        dispatch(googleAi(prompt));
         route.push(`/dashboard/story`);
     }
     return (

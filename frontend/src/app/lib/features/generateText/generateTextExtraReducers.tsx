@@ -1,5 +1,5 @@
 import { ActionReducerMapBuilder, PayloadAction } from "@reduxjs/toolkit";
-import { getPrompt, getStoryQuiz, getTranslateFromEnglish } from "./generateTextCreateAsyncThunk";
+import { getPrompt, getStoryQuiz, getTranslateFromEnglish, googleAi } from "./generateTextCreateAsyncThunk";
 import { getStringToJson } from "@/utils/getStringToJson";
 
 export const generateTextExtraReducers = {
@@ -16,7 +16,21 @@ export const generateTextExtraReducers = {
             state.loading = false;
             state.error = action.payload.error;
         });
-    },  
+    },
+    builderGoogleAi: function(builder: ActionReducerMapBuilder<any>) {
+        builder.addCase(googleAi.pending, (state) => {
+            state.loading = true;
+        });
+        builder.addCase(googleAi.fulfilled, (state, action: PayloadAction<any>) => {
+            console.log('generateTextExtraReducers:::getPrompt:::output', action.payload.output);
+            state.loading = false;
+            state.output = action.payload.output;
+        });
+        builder.addCase(googleAi.rejected, (state, action: PayloadAction<any>) => {
+            state.loading = false;
+            state.error = action.payload.error;
+        });
+    }, 
     builderGetTranslateFromEnglish: function(builder: ActionReducerMapBuilder<any>) {
         builder.addCase(getTranslateFromEnglish.pending, (state) => {
             state.loading = true;

@@ -3,7 +3,7 @@ import HttpService from "./HttpService";
 
 const GenerateTextService = {
     getPrompt: async (prompt: string) => {
-        const response = await axios.post('/api/googleAi/generate', {
+        const response = await axios.post('/api/generate', {
             body: prompt
         }, {
             headers: {
@@ -11,6 +11,16 @@ const GenerateTextService = {
             }
         });
         return Promise.resolve(response.data);
+    },
+
+    googleAi: async (prompt: string) => {
+        const response = await HttpService.getAxiosInstance().post(
+            `/api/googleAi/generate`,
+            {
+                body: prompt
+            }
+        );
+        return response.data;
     }
 }
 
