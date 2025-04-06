@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
-import { getSession } from 'next-auth/react';
+// Remove getSession import as NextAuth is disabled
+// import { getSession } from 'next-auth/react';
 
 class HttpService {
     private static instance: HttpService;
@@ -14,13 +15,17 @@ class HttpService {
         });
 
         this.axiosInstance.interceptors.request.use(async (config) => {
-            const session = await getSession();
-            console.log('HttpService:::session:::', session);
-            const token = session?.user?.accessToken;
+            // Remove getSession logic
+            // const session = await getSession();
+            // console.log('HttpService:::session:::', session);
+            // const token = session?.user?.accessToken;
+
+            // Directly get token from localStorage
             const tokenLocalStorage = localStorage.getItem('token');
-            
-            if (token || tokenLocalStorage) {
-                config.headers['Authorization'] = `Bearer ${token || tokenLocalStorage}`;
+            console.log('HttpService: Attaching token from localStorage:', tokenLocalStorage ? 'Found' : 'Not Found');
+
+            if (tokenLocalStorage) { // Use only localStorage token
+                config.headers['Authorization'] = `Bearer ${tokenLocalStorage}`;
             }
             return config;
         }, (error) => {
