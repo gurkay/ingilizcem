@@ -22,9 +22,9 @@ export const generateTextExtraReducers = {
             state.loading = true;
         });
         builder.addCase(googleAi.fulfilled, (state, action: PayloadAction<any>) => {
-            console.log('generateTextExtraReducers:::getPrompt:::output', action.payload.output);
+            console.log('generateTextExtraReducers:::getPrompt:::output', action.payload);
             state.loading = false;
-            state.output = action.payload.output;
+            state.output = action.payload;
         });
         builder.addCase(googleAi.rejected, (state, action: PayloadAction<any>) => {
             state.loading = false;

@@ -20,6 +20,7 @@ const GenerateTextService = {
                 body: prompt
             }
         );
+        console.log('GenerateTextService:::response:::', response);
         return response.data;
     }
 }

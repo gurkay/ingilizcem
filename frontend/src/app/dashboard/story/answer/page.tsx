@@ -11,7 +11,7 @@ function Answer() {
 
     return (
         <>
-            <div className="card m-3 p-2"><h5>Answers</h5></div>
+            <div className="card m-3 p-2 mt-20"><h5>Answers</h5></div>
             <div className="card m-3">
                 <div className="card-body">
                     <h5 className="card-title">Story: </h5>

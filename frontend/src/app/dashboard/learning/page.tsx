@@ -80,7 +80,7 @@ function LearningPage() {
     return (
         <>
             <MyLevelModal handleStory={handleStory} show={show} handleLevelModalClose={handleLevelModalClose} />
-            <div className="flex justify-center items-center m-8">
+            <div className="flex justify-center items-center m-8 mt-20">
                 <QuizDropdown handleShow={handleShow} handleQuiz={handleQuiz} />
             </div>
             <TableUserWords id={1} status="LEARNING" />

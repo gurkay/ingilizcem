@@ -1,15 +1,36 @@
 "use client";
 
+import { getServerAuthSession } from "@/utils/auth";
 import React, { useState } from "react";
 
 const links = [
   {
     name: "Contact Us",
-    href: "/contact",
+    href: "/pages/contact",
   },
   {
     name: "About Us",
-    href: "about",
+    href: "/pages/about",
+  },
+  {
+    name: "SignIn",
+    href: "/auth/signin",
+  },
+  {
+    name: "SignUp",
+    href: "/auth/signup",
+  },
+  {
+    name: "Dashboard",
+    href: "/dashboard",
+  },
+  {
+    name: "Lessons",
+    href: "/dashboard/lessons",
+  },
+  {
+    name: "Learning",
+    href: "/dashboard/learning",
   },
 ];
 
@@ -30,14 +51,15 @@ const HamburgerSVG = () => (
     />
   </svg>
 );
-
-const MobileMenuButton: React.FC = () => {
+interface IProps {
+  session?: any;
+}
+const MobileMenuButton: React.FC<IProps> = ({ session }) => {
   const [isOpen, setIsOpen] = useState(false);
-
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
-
+  const isAuthLinks = session ? links.slice(3,3) : links.slice(0, 4);
   return (
     <div className="md:hidden">
       <button
@@ -51,7 +73,7 @@ const MobileMenuButton: React.FC = () => {
       {isOpen && (
         <div className="absolute top-full left-0 w-full bg-white shadow-md p-4 rounded-b-md">
           <ul className="space-y-2">
-            {links.map((link, index) => (
+            {isAuthLinks.map((link, index) => (
               <li key={index}>
                 <a
                   href={link.href}

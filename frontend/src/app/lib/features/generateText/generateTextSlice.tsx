@@ -33,6 +33,7 @@ export const generateTextSlice = createSlice({
     },
     extraReducers: (builder) => {
         generateTextExtraReducers.builderGetPrompt(builder);
+        generateTextExtraReducers.builderGoogleAi(builder);
         generateTextExtraReducers.builderGetTranslateFromEnglish(builder);
         generateTextExtraReducers.builderGetStoryQuiz(builder);
     }
