@@ -11,7 +11,7 @@ function Header({ session }: IProps) {
   return (
     <header className="bg-white border-b-4 border-indigo-600 fixed top-0 left-0 w-full z-10">
       <div className="flex justify-between items-center py-4 px-6">
-        <MobileMenuButton />
+        <MobileMenuButton session={session} />
         <Link href="/" className="text-xl font-bold text-gray-800">
           Learn English with AI
         </Link>
@@ -28,12 +28,9 @@ function Header({ session }: IProps) {
           >
             Contact
           </Link>
-        </nav>
-
-        <div className="flex items-center space-x-4">
-          {session ? (
-            <>
-              <nav className="hidden md:flex space-x-4">
+          {
+            session && (
+              <>
                 <Link
                   href="/dashboard"
                   className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition-colors"
@@ -61,11 +58,16 @@ function Header({ session }: IProps) {
                   </svg>
                   Learning
                 </Link>
-                <DashboardButton />
-                <SignOutButton />
-              </nav>
+              </>
+            )
+          }
+        </nav>
 
-
+        <div className="flex items-center space-x-4">
+          {session ? (
+            <>
+              <DashboardButton />
+              <SignOutButton />
             </>
           ) : (
             <>

@@ -3,7 +3,7 @@
 import { getServerAuthSession } from "@/utils/auth";
 import React, { useState } from "react";
 
-const links = [
+const nonAuthLinks = [
   {
     name: "Contact Us",
     href: "/pages/contact",
@@ -20,6 +20,9 @@ const links = [
     name: "SignUp",
     href: "/auth/signup",
   },
+];
+
+const authLinks = [
   {
     name: "Dashboard",
     href: "/dashboard",
@@ -59,7 +62,8 @@ const MobileMenuButton: React.FC<IProps> = ({ session }) => {
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
-  const isAuthLinks = session ? links.slice(3,3) : links.slice(0, 4);
+
+  const isAuthLinks = session ? authLinks : nonAuthLinks;
   return (
     <div className="md:hidden">
       <button
