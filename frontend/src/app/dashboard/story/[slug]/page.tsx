@@ -1,7 +1,7 @@
 'use client';
 
 import GenerateText from "@/app/_components/GenerateText";
-import { getStoryQuiz, getTranslateFromEnglish } from "@/app/lib/features/generateText/generateTextCreateAsyncThunk";
+import { getStoryQuiz, getTranslateFromEnglish, googleAi } from "@/app/lib/features/generateText/generateTextCreateAsyncThunk";
 import { AppDispatch, RootState } from "@/app/lib/features/store";
 import { PromptConstants } from "@/constants/PromptConstants";
 import { getStringToJson } from "@/utils/getStringToJson";
@@ -44,6 +44,7 @@ function StorySlugPage({ params }: { params: { slug: string } }) {
     const translateStory = () => {
         const prompt = PromptConstants.getTranslateFromEnglish(selectorGenerateText.story || '');
         dispatch(getTranslateFromEnglish(prompt));
+        // dispatch(googleAi(prompt));
         setShowTranslate(!showTranslate);
     }
 

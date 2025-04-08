@@ -15,30 +15,17 @@ export const getPrompt: any = createAsyncThunk('getPrompt', async (prop: string)
 });
 
 export const googleAi: any = createAsyncThunk('googleAi', async (prop: string) => {
-    const response = await GenerateTextService.googleAi(prop);
-    return response;
-  }
+  const response = await GenerateTextService.googleAi(prop);
+  return response;
+}
 );
 
 export const getTranslateFromEnglish: any = createAsyncThunk('getTranslateFromEnglish', async (prop: string) => {
-  const response = await axios.post('/api/generate', {
-    body: prop
-  }, {
-    headers: {
-      'Content-type': 'application/json'
-    }
-  });
-  console.log('response.data:::getTranslateFromEnglish:::', response.data);
-  return Promise.resolve(response.data);
+  const response = await GenerateTextService.googleAi(prop);
+  return response;
 });
 
 export const getStoryQuiz: any = createAsyncThunk('getStoryQuiz', async (prop: string) => {
-  const response = await axios.post('/api/generate', {
-    body: prop
-  }, {
-    headers: {
-      'Content-type': 'application/json'
-    }
-  });
-  return Promise.resolve(response.data);
+  const response = await GenerateTextService.googleAi(prop);
+  return response;
 });

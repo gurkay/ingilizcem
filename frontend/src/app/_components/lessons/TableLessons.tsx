@@ -40,7 +40,7 @@ function TableLessons({ user }: IProps) {
     }
     console.log("selectorLesson.lessonPageDtos", selectorLesson.lessonPageDtos);
     return (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto mt-20">
             <table className="min-w-full bg-white rounded-lg overflow-hidden shadow-lg">
                 <thead className="bg-gray-100">
                     <tr>

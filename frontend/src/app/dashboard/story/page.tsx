@@ -1,6 +1,6 @@
 'use client';
 
-import { getPrompt, getStoryQuiz, getTranslateFromEnglish } from "@/app/lib/features/generateText/generateTextCreateAsyncThunk";
+import { getPrompt, getStoryQuiz, getTranslateFromEnglish, googleAi } from "@/app/lib/features/generateText/generateTextCreateAsyncThunk";
 import { setStory } from "@/app/lib/features/generateText/generateTextSlice";
 import { AppDispatch, RootState } from "@/app/lib/features/store";
 import { PromptConstants } from "@/constants/PromptConstants";
@@ -61,6 +61,7 @@ function Story() {
                             onClick={() => {
                                 const prompt = PromptConstants.getTranslateFromEnglish(selectorGenerateText.output || '');
                                 dispatch(getTranslateFromEnglish(prompt));
+                                // dispatch(googleAi(prompt));
                                 router.push(`/dashboard/story/translate`)
                             }}
                             className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
@@ -93,6 +94,7 @@ function Story() {
                                 dispatch(setStory(selectorGenerateText.output));
                                 const prompt = PromptConstants.getStoryQuiz(selectorGenerateText.output || '');
                                 dispatch(getStoryQuiz(prompt));
+                                //dispatch(googleAi(prompt));
                                 router.push(`/dashboard/story/quiz`);
                             }}
                             className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"

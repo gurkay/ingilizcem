@@ -36,9 +36,9 @@ export const generateTextExtraReducers = {
             state.loading = true;
         });
         builder.addCase(getTranslateFromEnglish.fulfilled, (state, action: PayloadAction<any>) => {
-            console.log('generateTextExtraReducers:::getTranslateFromEnglish:::output', action.payload.output);
+            console.log('generateTextExtraReducers:::getTranslateFromEnglish:::output', action.payload);
             state.loading = false;
-            state.translate = action.payload.output;
+            state.translate = action.payload;
         });
         builder.addCase(getTranslateFromEnglish.rejected, (state, action: PayloadAction<any>) => {
             state.loading = false;
@@ -50,9 +50,9 @@ export const generateTextExtraReducers = {
             state.loading = true;
         });
         builder.addCase(getStoryQuiz.fulfilled, (state, action: PayloadAction<any>) => {
-            console.log('generateTextExtraReducers:::getStoryQuiz:::output', action.payload.output);
+            console.log('generateTextExtraReducers:::getStoryQuiz:::output', action.payload);
             state.loading = false;
-            state.quiz = action.payload.output;
+            state.quiz = action.payload;
         });
         builder.addCase(getStoryQuiz.rejected, (state, action: PayloadAction<any>) => {
             state.loading = false;
