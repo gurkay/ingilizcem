@@ -19,7 +19,7 @@ function TableLessons({ user }: IProps) {
     
     const [paginationParams, setPaginationParams] = useState<IPaginationParams>({
         page: 0,
-        size: 5,
+        size: 50,
         sort: ["createdAt,desc"]
     });
 

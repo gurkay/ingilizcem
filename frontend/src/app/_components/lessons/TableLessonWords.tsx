@@ -18,7 +18,7 @@ function TableLessonWords({ id }: IProps) {
     const selectorLesson = useSelector((state: RootState) => state.lessonReducer);
     const [paginationParams, setPaginationParams] = useState<IPaginationParams>({
         page: 0,
-        size: 5,
+        size: 50,
         sort: ["id,desc"]
     });
     const [editingStatus, setEditingStatus] = useState<{ [key: number]: boolean }>({});
