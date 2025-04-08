@@ -34,4 +34,14 @@ public class LessonWords {
         @JoinColumn(name = "user_id", referencedColumnName = "user_id", insertable = false, updatable = false)
     })
     private UserWords userWords;
+
+    public LessonWords() {
+    }
+    
+    public LessonWords(Long lessonId, Long wordId, Long userId) {
+        this.lessonId = lessonId;
+        this.wordId = wordId;
+        this.userId = userId;
+    }
+    
 }

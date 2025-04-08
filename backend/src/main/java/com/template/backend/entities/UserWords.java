@@ -28,5 +28,15 @@ public class UserWords {
 
     @Column(name = "review_count")
     private int reviewCount;
-
+    
+    public UserWords() {
+    }
+    
+    public UserWords(User user, Word word, String status, Date lastReviewed, int reviewCount) {
+        this.user = user;
+        this.word = word;
+        this.status = status;
+        this.lastReviewed = lastReviewed;
+        this.reviewCount = reviewCount;
+    }
 }

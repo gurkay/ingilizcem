@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.template.backend.service.AuthService;
+import com.template.backend.views.LessonWordsView;
 
 import jakarta.validation.Valid;
 
@@ -14,12 +15,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.template.backend.entities.LessonWords;
 import com.template.backend.entities.User;
+import com.template.backend.entities.UserWords;
+import com.template.backend.entities.Word;
 import com.template.backend.payload.request.LoginRequest;
 import com.template.backend.payload.request.SignupRequest;
 import com.template.backend.payload.response.JwtResponse;
 import com.template.backend.payload.response.MessageResponse;
+import com.template.backend.repository.LessonWordsRepository;
+import com.template.backend.repository.LessonWordsViewRepository;
 import com.template.backend.repository.UserRepository;
+import com.template.backend.repository.UserWordsRepository;
+import com.template.backend.repository.WordsRepository;
 import com.template.backend.security.services.UserDetailsImpl;
 
 //create handlers for the endpoints
@@ -28,11 +36,25 @@ import com.template.backend.security.services.UserDetailsImpl;
 @RequestMapping("/api/auth")
 public class AuthController {
     private final UserRepository userRepository;
+    private final UserWordsRepository userWordsRepository;
+    private final WordsRepository wordsRepository;
+    private final LessonWordsRepository lessonWordsRepository;
+    private final LessonWordsViewRepository lessonWordsViewRepository;
     private final AuthService authService;
     // private JwtResponse jwtResponse;
     
-    public AuthController(UserRepository userRepository, AuthService authService) {
+    public AuthController(
+            UserRepository userRepository, 
+            UserWordsRepository userWordsRepository, 
+            WordsRepository wordsRepository, 
+            LessonWordsRepository lessonWordsRepository, 
+            LessonWordsViewRepository lessonWordsViewRepository, 
+            AuthService authService) {
         this.userRepository = userRepository;
+        this.userWordsRepository = userWordsRepository;
+        this.wordsRepository = wordsRepository;
+        this.lessonWordsRepository = lessonWordsRepository;
+        this.lessonWordsViewRepository = lessonWordsViewRepository;
         this.authService = authService;
     }
 
@@ -66,7 +88,17 @@ public class AuthController {
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
         authService.validateSignupRequest(signUpRequest);
         User user = authService.createNewUser(signUpRequest);
-        userRepository.save(user);
+        User newUser = userRepository.save(user);
+        List<LessonWordsView> lessonWordsView = lessonWordsViewRepository.findAll();
+        List<Word> wordsList = wordsRepository.findAll();
+
+        for (Word word : wordsList) {
+            userWordsRepository.save(new UserWords(newUser, word, "NEW", null, 0));
+        }
+
+        for (LessonWordsView view : lessonWordsView) {
+            lessonWordsRepository.save(new LessonWords(view.getLessonId(), view.getWordId(), newUser.getId()));
+        }
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }

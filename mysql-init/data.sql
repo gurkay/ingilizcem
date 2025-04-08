@@ -20,16 +20,7 @@ INSERT INTO roles(name, description) VALUES('ROLE_REVIEWER', 'Reviewer role');
 INSERT INTO users (name, email, password, created_at) 
 VALUES ('gurbas', 'gunesebak@gmail.com', '$2a$10$C7qVkluVhnCDjGF7Uw2by.INAqnCZaXJGQ/P.W5JRo5CXPnCU3ZGC', CURRENT_TIMESTAMP);
 
-INSERT INTO users (name, email, password, created_at) 
-VALUES ('gurkay', 'gurkay.basyigit@gmail.com', '$2a$10$C7qVkluVhnCDjGF7Uw2by.INAqnCZaXJGQ/P.W5JRo5CXPnCU3ZGC', CURRENT_TIMESTAMP);
-
 -- Admin rolünü kullanıcıya ata
-INSERT INTO users_roles (user_id, role_id)
-SELECT u.id, r.id 
-FROM users u, roles r 
-WHERE u.email = 'gurkay.basyigit@gmail.com' 
-AND r.name = 'ROLE_MANAGER';
-
 INSERT INTO users_roles (user_id, role_id)
 SELECT u.id, r.id 
 FROM users u, roles r 
@@ -37,12 +28,6 @@ WHERE u.email = 'gunesebak@gmail.com'
 AND r.name = 'ROLE_MANAGER';
 
 -- Manager rolünü de ekleyelim
-INSERT INTO users_roles (user_id, role_id)
-SELECT u.id, r.id 
-FROM users u, roles r 
-WHERE u.email = 'gurkay.basyigit@gmail.com' 
-AND r.name = 'ROLE_ADMIN'; 
-
 INSERT INTO users_roles (user_id, role_id)
 SELECT u.id, r.id 
 FROM users u, roles r 
@@ -6770,3 +6755,23 @@ INSERT INTO lesson_words (lesson_id, word_id, user_id) VALUES
 (6,2233, 1),
 (6,2234, 1),
 (6,2235, 1);
+
+CREATE OR REPLACE VIEW lesson_words_view AS
+SELECT DISTINCT
+    l.id AS lesson_id, 
+    l.title AS lesson_title, 
+    l.description AS lesson_description,
+    w.id AS word_id,
+    w.word AS word,
+    w.mean AS meaning,
+    w.word_type AS word_type,
+    w.sentence AS sentence,
+    lw.id AS lesson_words_id
+FROM 
+    lessons l
+JOIN 
+    lesson_words lw ON l.id = lw.lesson_id
+JOIN 
+    words w ON lw.word_id = w.id
+ORDER BY 
+    l.id, w.id;

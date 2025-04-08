@@ -8,7 +8,22 @@ export async function apiAuthSignUp(credentials: {
   try {
     console.log(`backendSignUp:::${FRONTEND_API}/api/auth/signup`);
     console.log("credentials", credentials);
-    const response = await fetch(`${process.env.BACKEND_API_URL}/api/auth/signup`, {
+    // Docker ortamında doğru URL'yi kullan
+    let apiUrl;
+    if (typeof window === 'undefined') {
+      // Server-side rendering durumunda
+      apiUrl = process.env.BACKEND_API_URL;
+      console.log('[Auth] Server-side giriş URL yapısı kullanılıyor');
+    } else {
+      // Client-side rendering durumunda
+      apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      console.log('[Auth] Client-side giriş URL yapısı kullanılıyor');
+    }
+
+    if (!apiUrl) {
+      apiUrl = 'https://ingilizcem.net';
+    }
+    const response = await fetch(`${apiUrl}/api/auth/signup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
