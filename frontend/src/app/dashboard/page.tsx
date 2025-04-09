@@ -1,4 +1,5 @@
 import { getServerAuthSession } from "@/utils/auth";
+import ImportWordsUser from "../_components/userWords/ImportWordsUser";
 
 export default async function Dashboard() {
   console.log("Dashboard page");
@@ -9,7 +10,7 @@ export default async function Dashboard() {
   // Add error handling for failed authentication
 
   return (
-    <div className="container mx-auto max-w-md px-4 py-8">
+    <div className="container mx-auto max-w-md px-4 py-8 mt-20">
       <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
 
       <p className="text-gray-700 mt-2 mb-4">
@@ -21,6 +22,7 @@ export default async function Dashboard() {
         <p className="text-white">User: {session?.user.email}</p>
         <p className="text-white">Roles: {session?.user.roles?.join(', ')}</p>
       </div>
+      
     </div>
   );
 }

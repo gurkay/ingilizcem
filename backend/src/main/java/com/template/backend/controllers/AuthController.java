@@ -39,7 +39,6 @@ public class AuthController {
     private final UserWordsRepository userWordsRepository;
     private final WordsRepository wordsRepository;
     private final LessonWordsRepository lessonWordsRepository;
-    private final LessonWordsViewRepository lessonWordsViewRepository;
     private final AuthService authService;
     // private JwtResponse jwtResponse;
     
@@ -54,7 +53,6 @@ public class AuthController {
         this.userWordsRepository = userWordsRepository;
         this.wordsRepository = wordsRepository;
         this.lessonWordsRepository = lessonWordsRepository;
-        this.lessonWordsViewRepository = lessonWordsViewRepository;
         this.authService = authService;
     }
 
@@ -89,17 +87,12 @@ public class AuthController {
         authService.validateSignupRequest(signUpRequest);
         User user = authService.createNewUser(signUpRequest);
         User newUser = userRepository.save(user);
-        List<LessonWordsView> lessonWordsView = lessonWordsViewRepository.findAll();
         List<Word> wordsList = wordsRepository.findAll();
 
         for (Word word : wordsList) {
             userWordsRepository.save(new UserWords(newUser, word, "NEW", null, 0));
         }
-
-        for (LessonWordsView view : lessonWordsView) {
-            lessonWordsRepository.save(new LessonWords(view.getLessonId(), view.getWordId(), newUser.getId()));
-        }
-
+        
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 

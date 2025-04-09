@@ -52,4 +52,10 @@ public class UserWordsController {
         Page<UserWords> userWords = userWordsService.findByUserIdAndStatus(userId, status, pageable);
         return ResponseEntity.ok(userWords);
     }
+
+    @GetMapping("/importWordsUser/{userId}")
+    public ResponseEntity<String> importWordsUser(@PathVariable Long userId) {
+        userWordsService.importWordsUser(userId);
+        return ResponseEntity.ok("success");
+    }
 }

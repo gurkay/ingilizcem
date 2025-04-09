@@ -6757,21 +6757,23 @@ INSERT INTO lesson_words (lesson_id, word_id, user_id) VALUES
 (6,2235, 1);
 
 CREATE OR REPLACE VIEW lesson_words_view AS
-SELECT DISTINCT
+SELECT 
     l.id AS lesson_id, 
-    l.title AS lesson_title, 
-    l.description AS lesson_description,
+    MAX(l.title) AS lesson_title, 
+    MAX(l.description) AS lesson_description,
     w.id AS word_id,
-    w.word AS word,
-    w.mean AS meaning,
-    w.word_type AS word_type,
-    w.sentence AS sentence,
-    lw.id AS lesson_words_id
+    MAX(w.word) AS word,
+    MAX(w.mean) AS meaning,
+    MAX(w.word_type) AS word_type,
+    MAX(w.sentence) AS sentence,
+    MAX(lw.id) AS lesson_words_id
 FROM 
     lessons l
 JOIN 
     lesson_words lw ON l.id = lw.lesson_id
 JOIN 
     words w ON lw.word_id = w.id
+GROUP BY 
+    l.id, w.id
 ORDER BY 
     l.id, w.id;

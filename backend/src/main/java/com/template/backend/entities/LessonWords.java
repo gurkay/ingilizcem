@@ -43,5 +43,4 @@ public class LessonWords {
         this.wordId = wordId;
         this.userId = userId;
     }
-    
 }

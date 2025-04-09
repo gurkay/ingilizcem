@@ -2,7 +2,7 @@ import { IPaginationParams } from "@/interfaces/IPaginationParams";
 import HttpService from "./HttpService";
 
 const LessonService = {
-    findByUserId: async (userId: number, params: IPaginationParams) => {
+        findByUserId: async (userId: number, params: IPaginationParams) => {
         console.log("LessonService:::findByUserId:::params", params);
         const { page, size, sort } = params;
         

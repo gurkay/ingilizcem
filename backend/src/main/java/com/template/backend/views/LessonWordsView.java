@@ -8,26 +8,15 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "lesson_words_view")
-public class LessonWordsView implements Serializable {
+public class LessonWordsView {
     @Id
-    private Long lessonId;
-    private String lessonTitle;
-    private String lessonDescription;
-    private Long wordId;
-    private String word;
-    private String meaning;
-    private String wordType;
-    private String sentence;
-    private Long lessonWordsId;
-
-    public LessonWordsView() {
-    }
-    
-    public Long getLessonId() {
-        return lessonId;
-    }
-    
-    public Long getWordId() {
-        return wordId;
-    }
+    public Long lessonId;
+    public String lessonTitle;
+    public String lessonDescription;
+    public Long wordId;
+    public String word;
+    public String meaning;
+    public String wordType;
+    public String sentence;
+    public Long lessonWordsId;
 }

@@ -18,6 +18,7 @@ export const userWordsSlice = createSlice({
     },
     extraReducers: (builder) => {
         userWordsExtraReducers.builderFindByUserIdAndStatus(builder);
+        userWordsExtraReducers.builderInportWordsUser(builder);
     }
 });
 

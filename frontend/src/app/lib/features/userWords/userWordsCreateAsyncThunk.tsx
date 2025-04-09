@@ -15,3 +15,11 @@ export const findByUserIdAndStatus = createAsyncThunk(
     return response;
   }
 );
+
+export const importWordsUser = createAsyncThunk(
+  'importWordsUser',
+  async (userId: number) => {
+    const response = await UserWordsService.importWordsUser(userId);
+    return response;
+  }
+);

@@ -22,6 +22,11 @@ const UserWordsService = {
         );
         console.log("LessonService:::findByUserId:::response", response);
         return response.data;
+    },
+
+    importWordsUser: async (userId: number) => {
+        const response = await HttpService.getAxiosInstance().get(`/api/user-words/importWordsUser/${userId}`);
+        return response.data;
     }
 }
 

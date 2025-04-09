@@ -24,7 +24,8 @@ function TableLessons({ user }: IProps) {
     });
 
     useEffect(() => {
-        dispatch(findByUserId({ id: user.id, pagination: paginationParams }));
+        // dispatch(findByUserId({ id: user.id, pagination: paginationParams }));
+        dispatch(findByUserId({ id: 1, pagination: paginationParams }));
     }, [paginationParams]);
 
     const handlePageChange = (newPage: number) => {
